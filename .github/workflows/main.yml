@@ -26,11 +26,10 @@ jobs:
           go build
           go test
           # Run code review tool here
-      - name: Approve and merge
+      - name: Merge to main
         if: success()
-        run: |
-          git config --global user.name 'GitHub Action'
-          git config --global user.email 'githubactions@example.com'
-          git checkout -b main
-          git merge --no-ff feature-branch
-          git push origin main
+        uses: actions/merge@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          source_branch: ${{ github.head_ref }}
+          target_branch: main
