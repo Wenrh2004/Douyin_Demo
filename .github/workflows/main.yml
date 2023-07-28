@@ -31,6 +31,6 @@ jobs:
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'githubactions@example.com'
-          git checkout main
+          git checkout -b main
           git merge --no-ff feature-branch
           git push origin main
