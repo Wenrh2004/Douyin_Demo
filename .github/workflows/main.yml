@@ -28,7 +28,7 @@ jobs:
           # Run code review tool here
       - name: Merge to main
         if: success()
-        uses: actions/merge@v1
+        uses: devmasx/merge-branch@1.4.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           source_branch: ${{ github.head_ref }}
