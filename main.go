@@ -13,6 +13,7 @@ package main
 import (
 	"Douyin_Demo/common"
 	"Douyin_Demo/controller"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,18 +29,21 @@ func collectRoutes(route *gin.Engine) *gin.Engine {
 
 func main() {
 	//	获取初始化数据库
-	db := common.InitDB()
-
-	defer db.Close()
-
+	common.InitDB()
 	//	创建路由
 	route := gin.Default()
 	route.ForwardedByClientIP = true
-	route.SetTrustedProxies([]string{"127.0.0.1"})
-
+	proxyErr := route.SetTrustedProxies([]string{"127.0.0.1"})
+	if proxyErr != nil {
+		panic(proxyErr)
+	}
 	//	启动路由
 	collectRoutes(route)
 
 	//	启动服务
-	route.Run(":5500")
+	err := route.Run(":5500")
+	if err != nil {
+		panic("service start failed" + err.Error())
+
+	}
 }
