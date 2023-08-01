@@ -1,0 +1,10 @@
+mysql:
+  dataBase: DouYin
+  userName: root
+  passWord: ndwmd1230
+  port: 3306
+  driverName: mysql
+  host: 139.155.134.33
+token:
+  expire: 216000
+  mySecret: golang.org

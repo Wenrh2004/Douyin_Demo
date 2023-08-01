@@ -11,21 +11,25 @@
 package controller
 
 import (
+	"Douyin_Demo/Constants"
 	"Douyin_Demo/common"
 	"Douyin_Demo/model"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-	"net/http"
 )
 
-// 用户操作
 // 用户注册
 func Register(ctx *gin.Context) {
 	db := common.GetDB()
 
 	//	获取参数
 	var requestUser model.User
-	ctx.Bind(&requestUser)
+	err := ctx.Bind(&requestUser)
+	if err != nil {
+		panic("Parameter bind failed" + err.Error())
+	}
 	userName := requestUser.Username
 	password := requestUser.Password
 
@@ -33,16 +37,18 @@ func Register(ctx *gin.Context) {
 	//	用户名校验
 	if len(userName) == 0 {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-			"code":    422,
-			"message": "用户名不能为空",
+			"code":        422,
+			"message":     "用户名不能为空",
+			"description": Constants.PARAMS_ERROR,
 		})
 		return
 	}
 	//	密码校验
 	if len(password) < 6 {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-			"code":    422,
-			"message": "密码至少6位",
+			"code":        422,
+			"message":     "密码至少6位",
+			"description": Constants.MISMATCH,
 		})
 		return
 	}
@@ -51,8 +57,9 @@ func Register(ctx *gin.Context) {
 	db.Where("userName = ?", userName).First(&user)
 	if user.ID != 0 {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-			"code":    422,
-			"message": "用户已被注册",
+			"code":        422,
+			"message":     "用户已被注册",
+			"description": Constants.USER_PROFILE_ALREAD_UESD,
 		})
 		return
 	}
@@ -61,8 +68,9 @@ func Register(ctx *gin.Context) {
 	hasedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"code":    500,
-			"message": "Error, please try again!",
+			"code":        500,
+			"message":     "新增用户信息失败",
+			"description": Constants.DB_SAVE_FAILED,
 		})
 		return
 	}
@@ -73,8 +81,9 @@ func Register(ctx *gin.Context) {
 	db.Create(&newUser)
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"code":    200,
-		"message": "Success!",
+		"code":        200,
+		"message":     "用户信息录入成功",
+		"description": Constants.SUCCESS,
 	})
 }
 
@@ -83,7 +92,10 @@ func Login(ctx *gin.Context) {
 	db := common.GetDB()
 
 	var requestUser model.User
-	ctx.Bind(&requestUser)
+	err := ctx.Bind(&requestUser)
+	if err != nil {
+		panic("Parameter bind failed" + err.Error())
+	}
 	//	获取参数
 	userName := requestUser.Username
 	password := requestUser.Password
@@ -92,16 +104,18 @@ func Login(ctx *gin.Context) {
 	//	用户名校验
 	if len(userName) == 0 {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-			"code":    422,
-			"message": "用户名不能为空",
+			"code":        422,
+			"message":     "用户名不能为空",
+			"description": Constants.PARAMS_ERROR,
 		})
 		return
 	}
 	//	密码校验
 	if len(password) < 6 {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-			"code":    422,
-			"message": "密码至少6位",
+			"code":        422,
+			"message":     "密码至少6位",
+			"description": Constants.PARAMS_ERROR,
 		})
 		return
 	}
@@ -110,22 +124,25 @@ func Login(ctx *gin.Context) {
 	db.Where("userName = ?", userName).First(&user)
 	if user.ID == 0 {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-			"code":    422,
-			"message": "用户不存在",
+			"code":        422,
+			"message":     "用户不存在",
+			"description": Constants.MISMATCH,
 		})
 		return
 	}
 	//	密码校验
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-			"code":    422,
-			"message": "密码错误",
+			"code":        422,
+			"message":     "密码错误",
+			"description": Constants.PARAMS_ERROR,
 		})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"code":    200,
-		"message": "登陆成功",
+		"code":        200,
+		"message":     "登陆成功",
+		"description": Constants.LOGIN_SUCCESS,
 	})
 }
