@@ -1,13 +1,3 @@
-/*
- * Copyright (c) 2023.
- * Project: Douyin_Demo
- * File: user.go
- * Last date: 2023/7/28 下午6:52
- * Developer: KingYen
- *
- * Created by KingYen on 2023/7/28 18:52:9.
- */
-
 package model
 
 import "github.com/jinzhu/gorm"
