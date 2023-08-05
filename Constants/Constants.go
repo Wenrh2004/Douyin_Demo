@@ -33,3 +33,8 @@ const (
 
 // general constants
 const SUCCESS = "success"
+
+const (
+	User_NORMAL = "normalUser"
+	Issuer      = "Auth_server"
+)

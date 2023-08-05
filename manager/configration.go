@@ -4,8 +4,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-// GetTokenConfig == > get whole configuration properties
-func GetTokenExpireConfig() int {
+// GetTokenSecretConfig == > get whole configuration properties
+func GetYamlConfigByString(content string) string {
 	viper.SetConfigType("yaml")
 	viper.SetConfigFile("application.yaml")
 	if err := viper.ReadInConfig(); err != nil {
@@ -14,12 +14,12 @@ func GetTokenExpireConfig() int {
 		}
 		panic("config file read error+" + err.Error())
 	}
-	tokenEXpr := viper.GetInt("token.expire")
-	return tokenEXpr
+	secretKey := viper.GetString(content)
+	return secretKey
 }
 
 // GetTokenSecretConfig == > get whole configuration properties
-func GetTokenSecretConfig() string {
+func GetYamlConfigByInt(content string) int {
 	viper.SetConfigType("yaml")
 	viper.SetConfigFile("application.yaml")
 	if err := viper.ReadInConfig(); err != nil {
@@ -28,6 +28,6 @@ func GetTokenSecretConfig() string {
 		}
 		panic("config file read error+" + err.Error())
 	}
-	secretKey := viper.GetString("token.mySecret")
+	secretKey := viper.GetInt(content)
 	return secretKey
 }
