@@ -11,7 +11,7 @@ import (
 type Querier interface {
 	// GetByRoles query data by roles and return it as *slice of pointer*
 	//   (The below blank line is required to comment for the generated method)
-	//
+	//	//
 	// SELECT * FROM @@table WHERE role IN @rolesName
 	GetByRoles(rolesName ...string) ([]*gen.T, error)
 }
