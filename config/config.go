@@ -51,7 +51,7 @@ func unmarshallConfig() {
 		panic("config file Unmarshal error+" + err.Error())
 	}
 
-	fmt.Println("AppConfig", AppConfig)
+	//fmt.Println("AppConfig", AppConfig)
 }
 
 // setDefaultConfig == > set default configuration properties
