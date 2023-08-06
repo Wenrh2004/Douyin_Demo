@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"Douyin_Demo/Constants"
-	"Douyin_Demo/DTO"
+	"Douyin_Demo/constants"
+	"Douyin_Demo/dto"
 	"Douyin_Demo/manager"
 	"errors"
 	"time"
@@ -20,16 +20,16 @@ type JWTClaims struct {
 const AUDIENCE = "USER_NORMAL"
 
 // GenerateJWTClaim generate json web token claim used by check login status
-func GenerateJWTClaim(user DTO.UserRequestDTO) string {
+func GenerateJWTClaim(user dto.UserRequestDTO) string {
 	var tokenExpr = time.Now().Add(time.Duration(manager.GetYamlConfigByInt("token.expire")) * time.Second)
 	var claims = JWTClaims{
 		UserID:     user.UserID,
-		GrantScope: Constants.User_NORMAL,
+		GrantScope: constants.User_NORMAL,
 		StandardClaims: jwt.StandardClaims{
 			Audience:  AUDIENCE,
 			ExpiresAt: tokenExpr.Unix(),
 			Id:        user.Password,
-			Issuer:    Constants.Issuer,
+			Issuer:    constants.Issuer,
 		},
 	}
 	var token, err = jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(manager.GetYamlConfigByString("token.mySecret")))
@@ -44,8 +44,8 @@ func Secret() jwt.Keyfunc {
 	}
 }
 
-// ParseTokenClaim ParseTokenClaim
-func ParseTokenClaim(token string) *jwt.Token {
+// VerifyBasicTokenClaim verify token fmt expr
+func VerifyBasicTokenClaim(token string) *jwt.Token {
 	tokenVal, err := jwt.ParseWithClaims(token, &JWTClaims{}, Secret())
 	if err != nil {
 		if ve, ok := err.(*jwt.ValidationError); ok {
@@ -63,13 +63,38 @@ func ParseTokenClaim(token string) *jwt.Token {
 	return tokenVal
 }
 
-// VerifyToken get token single prof value
-func VerifyToken(token *jwt.Token, content string) interface{} {
-	var tokenProfValue interface{}
+// GetTokenSingleClaim get token single prof value
+func GetTokenSingleClaim(token *jwt.Token, content string) string {
+	var tokenProfValue string
 	if claims, err := token.Claims.(jwt.MapClaims); err {
 		tokenProfValue = claims[content].(string) // 获取 user_id 字段的值
 	} else {
 		panic(err)
 	}
 	return tokenProfValue
+}
+
+// TokenClaimVerify token claims verify
+func TokenClaimVerify(token *jwt.Token, content string, res string) map[string]interface{} {
+	if token == nil {
+		return map[string]interface{}{
+			"code":        422,
+			"message":     "token is null",
+			"description": constants.PARAMS_ERROR,
+		}
+	}
+	// get single token claim
+	claim := GetTokenSingleClaim(token, content)
+	if claim == res && res != "" && claim != "" {
+		return map[string]interface{}{
+			"code":        422,
+			"message":     "verify success",
+			"description": constants.SUCCESS,
+		}
+	}
+	return map[string]interface{}{
+		"code":        422,
+		"message":     "token is invalid",
+		"description": constants.PARAMS_ERROR,
+	}
 }

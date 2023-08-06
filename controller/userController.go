@@ -11,8 +11,8 @@
 package controller
 
 import (
-	"Douyin_Demo/Constants"
 	"Douyin_Demo/common"
+	"Douyin_Demo/constants"
 	"Douyin_Demo/model"
 	"net/http"
 	"regexp"
@@ -42,7 +42,7 @@ func Register(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
 			"code":        422,
 			"message":     "用户名不能为空",
-			"description": Constants.PARAMS_ERROR,
+			"description": constants.PARAMS_ERROR,
 		})
 		var rgx = "^[a-zA-Z\\u4e00-\\u9fa5]{1,8}\\$" // 1-8 中文英文但是不包含下划线等符号
 		matchedRes, _ := regexp.MatchString(rgx, userName)
@@ -51,7 +51,7 @@ func Register(ctx *gin.Context) {
 			ctx.JSON(http.StatusUnavailableForLegalReasons, gin.H{
 				"code":        422,
 				"message":     "用户名不符合规范,",
-				"description": Constants.PARAMS_ERROR,
+				"description": constants.PARAMS_ERROR,
 			})
 		}
 	}
@@ -60,7 +60,7 @@ func Register(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
 			"code":        422,
 			"message":     "密码长度在6位-18位之间,且必须使用字母数字和特殊符号",
-			"description": Constants.MISMATCH,
+			"description": constants.MISMATCH,
 		})
 		var rgx = "^[a-zA-Z0-9~!@#\\$%^&*()_+}{\":?><,.';\\]\\[\\\\\\/\\-]{6,18}\\$" // 6 - 18 英语字母数字特殊符号组成
 
@@ -69,7 +69,7 @@ func Register(ctx *gin.Context) {
 			ctx.JSON(http.StatusUnavailableForLegalReasons, gin.H{
 				"code":        422,
 				"message":     "密码不符合规范,",
-				"description": Constants.PARAMS_ERROR,
+				"description": constants.PARAMS_ERROR,
 			})
 		}
 	}
@@ -80,7 +80,7 @@ func Register(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
 			"code":        422,
 			"message":     "用户已被注册",
-			"description": Constants.USER_PROFILE_ALREAD_UESD,
+			"description": constants.USER_PROFILE_ALREAD_UESD,
 		})
 	}
 
@@ -90,7 +90,7 @@ func Register(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"code":        500,
 			"message":     "用户信息异常",
-			"description": Constants.DB_MISMATCH,
+			"description": constants.DB_MISMATCH,
 		})
 	}
 	newUser := model.User{
@@ -103,14 +103,14 @@ func Register(ctx *gin.Context) {
 		ctx.JSON(http.StatusExpectationFailed, gin.H{
 			"code":        500,
 			"message":     "新增用户信息失败",
-			"description": Constants.DB_SAVE_FAILED,
+			"description": constants.DB_SAVE_FAILED,
 		})
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"code":        200,
 		"message":     "用户信息录入成功",
-		"description": Constants.SUCCESS,
+		"description": constants.SUCCESS,
 	})
 }
 
@@ -134,7 +134,7 @@ func Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
 			"code":        422,
 			"message":     "用户名不能为空",
-			"description": Constants.PARAMS_ERROR,
+			"description": constants.PARAMS_ERROR,
 		})
 	}
 	//	user in db status
@@ -144,7 +144,7 @@ func Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
 			"code":        422,
 			"message":     "用户不存在",
-			"description": Constants.MISMATCH,
+			"description": constants.MISMATCH,
 		})
 		return
 	}
@@ -158,7 +158,7 @@ func Login(ctx *gin.Context) {
 			ctx.JSON(http.StatusUnavailableForLegalReasons, gin.H{
 				"code":        422,
 				"message":     "密码不符合规范,",
-				"description": Constants.PARAMS_ERROR,
+				"description": constants.PARAMS_ERROR,
 			})
 		}
 
@@ -166,7 +166,7 @@ func Login(ctx *gin.Context) {
 			ctx.JSON(http.StatusExpectationFailed, gin.H{
 				"code":        422,
 				"message":     "密码错误",
-				"description": Constants.PARAMS_ERROR,
+				"description": constants.PARAMS_ERROR,
 			})
 		}
 	}
@@ -174,6 +174,6 @@ func Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"code":        200,
 		"message":     "登陆成功",
-		"description": Constants.LOGIN_SUCCESS,
+		"description": constants.LOGIN_SUCCESS,
 	})
 }
