@@ -9,6 +9,7 @@ type AppConfigSchema struct {
 	// DataBase
 	Database MySQL `mapstructure:"mysql"`
 	DSN      string
+	AWS      AWS `mapstructure:"aws"`
 }
 
 // MySQL  == > mysql-database Yaml map to JSON
@@ -19,6 +20,13 @@ type MySQL struct {
 	DriverName string `mapstructure:"driverName"`
 	Port       string `mapstructure:"port"`
 	Database   string `mapstructure:"dataBase"`
+}
+
+type AWS struct {
+	AccessKey  string `mapstructure:"accessKey"`
+	Secret     string `mapstructure:"secret"`
+	Region     string `mapstructure:"region"`
+	BucketName string `mapstructure:"bucketName"`
 }
 
 // AppConfig == > global variable
@@ -64,6 +72,11 @@ func setDefaultConfig() {
 	viper.SetDefault("mysql.dataBase", "test")
 	viper.SetDefault("mysql.driverName", "mysql")
 
+	// aws
+	viper.SetDefault("aws.accessKey", "accessKey")
+	viper.SetDefault("aws.secret", "secret")
+	viper.SetDefault("aws.region", "region")
+	viper.SetDefault("aws.bucketName", "bucketName")
 }
 
 func main() {
