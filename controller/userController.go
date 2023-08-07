@@ -11,20 +11,21 @@
 package controller
 
 import (
-	"Douyin_Demo/Constants"
 	"Douyin_Demo/common"
+	"Douyin_Demo/constants"
 	"Douyin_Demo/model"
 	"net/http"
+	"regexp"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
 
-// 用户注册
+// Register method for user registry
 func Register(ctx *gin.Context) {
 	db := common.GetDB()
 
-	//	获取参数
+	//	observe web request
 	var requestUser model.User
 	err := ctx.Bind(&requestUser)
 	if err != nil {
@@ -32,62 +33,88 @@ func Register(ctx *gin.Context) {
 	}
 	userName := requestUser.Username
 	password := requestUser.Password
+	// todo 数据解密
 
-	//	数据校验
-	//	用户名校验
+	//	data check
+
+	//	check username
 	if len(userName) == 0 {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
 			"code":        422,
 			"message":     "用户名不能为空",
-			"description": Constants.PARAMS_ERROR,
+			"description": constants.PARAMS_ERROR,
 		})
-		return
+		var rgx = "^[a-zA-Z\\u4e00-\\u9fa5]{1,8}\\$" // 1-8 中文英文但是不包含下划线等符号
+		matchedRes, _ := regexp.MatchString(rgx, userName)
+
+		if !matchedRes {
+			ctx.JSON(http.StatusUnavailableForLegalReasons, gin.H{
+				"code":        422,
+				"message":     "用户名不符合规范,",
+				"description": constants.PARAMS_ERROR,
+			})
+		}
 	}
-	//	密码校验
-	if len(password) < 6 {
+	//	password check
+	if len(password) < 6 || len(password) > 18 {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
 			"code":        422,
-			"message":     "密码至少6位",
-			"description": Constants.MISMATCH,
+			"message":     "密码长度在6位-18位之间,且必须使用字母数字和特殊符号",
+			"description": constants.MISMATCH,
 		})
-		return
+		var rgx = "^[a-zA-Z0-9~!@#\\$%^&*()_+}{\":?><,.';\\]\\[\\\\\\/\\-]{6,18}\\$" // 6 - 18 英语字母数字特殊符号组成
+
+		matchedRes, _ := regexp.MatchString(rgx, userName)
+		if !matchedRes {
+			ctx.JSON(http.StatusUnavailableForLegalReasons, gin.H{
+				"code":        422,
+				"message":     "密码不符合规范,",
+				"description": constants.PARAMS_ERROR,
+			})
+		}
 	}
-	//	用户是否已注册
+	// promise only one in db
 	var user model.User
 	db.Where("userName = ?", userName).First(&user)
 	if user.ID != 0 {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
 			"code":        422,
 			"message":     "用户已被注册",
-			"description": Constants.USER_PROFILE_ALREAD_UESD,
+			"description": constants.USER_PROFILE_ALREAD_UESD,
 		})
-		return
 	}
 
-	//	新增用户
-	hasedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	//	save user into database
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"code":        500,
-			"message":     "新增用户信息失败",
-			"description": Constants.DB_SAVE_FAILED,
+			"message":     "用户信息异常",
+			"description": constants.DB_MISMATCH,
 		})
-		return
 	}
 	newUser := model.User{
 		Username: userName,
-		Password: string(hasedPassword),
+		Password: string(hashedPassword),
 	}
-	db.Create(&newUser)
+	tx := db.Create(&newUser)
+
+	if tx != nil {
+		ctx.JSON(http.StatusExpectationFailed, gin.H{
+			"code":        500,
+			"message":     "新增用户信息失败",
+			"description": constants.DB_SAVE_FAILED,
+		})
+	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"code":        200,
 		"message":     "用户信息录入成功",
-		"description": Constants.SUCCESS,
+		"description": constants.SUCCESS,
 	})
 }
 
-// 用户登陆
+// Login user login
 func Login(ctx *gin.Context) {
 	db := common.GetDB()
 
@@ -96,53 +123,57 @@ func Login(ctx *gin.Context) {
 	if err != nil {
 		panic("Parameter bind failed" + err.Error())
 	}
-	//	获取参数
+	//	get params from web
 	userName := requestUser.Username
 	password := requestUser.Password
 
-	//	数据校验
-	//	用户名校验
+	//	data check
+
+	//	username check
 	if len(userName) == 0 {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
 			"code":        422,
 			"message":     "用户名不能为空",
-			"description": Constants.PARAMS_ERROR,
+			"description": constants.PARAMS_ERROR,
 		})
-		return
 	}
-	//	密码校验
-	if len(password) < 6 {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-			"code":        422,
-			"message":     "密码至少6位",
-			"description": Constants.PARAMS_ERROR,
-		})
-		return
-	}
-	//	用户是否注册
+	//	user in db status
 	var user model.User
 	db.Where("userName = ?", userName).First(&user)
 	if user.ID == 0 {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
 			"code":        422,
 			"message":     "用户不存在",
-			"description": Constants.MISMATCH,
+			"description": constants.MISMATCH,
 		})
 		return
 	}
-	//	密码校验
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-			"code":        422,
-			"message":     "密码错误",
-			"description": Constants.PARAMS_ERROR,
-		})
-		return
-	}
+	//	password check
+	if len(password) < 6 || len(password) > 18 {
+		var rgx = "^[a-zA-Z0-9~!@#\\$%^&*()_+}{\":?><,.';\\]\\[\\\\\\/\\-]{6,18}\\$" // 6 - 18 英语字母数字特殊符号组成
 
+		matchedRes, _ := regexp.MatchString(rgx, userName)
+
+		if !matchedRes {
+			ctx.JSON(http.StatusUnavailableForLegalReasons, gin.H{
+				"code":        422,
+				"message":     "密码不符合规范,",
+				"description": constants.PARAMS_ERROR,
+			})
+		}
+
+		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+			ctx.JSON(http.StatusExpectationFailed, gin.H{
+				"code":        422,
+				"message":     "密码错误",
+				"description": constants.PARAMS_ERROR,
+			})
+		}
+	}
+	// todo write a token and refresh token
 	ctx.JSON(http.StatusOK, gin.H{
 		"code":        200,
 		"message":     "登陆成功",
-		"description": Constants.LOGIN_SUCCESS,
+		"description": constants.LOGIN_SUCCESS,
 	})
 }
