@@ -3,13 +3,20 @@ package storage
 import (
 	envcfg "Douyin_Demo/config"
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"io"
 	"log"
+	"net/http"
 )
+
+type LambdaResponseBody struct {
+	ThumbnailFileName string `json:"thumbnailFileName"`
+	Status            string `json:"status"`
+}
 
 var s3Client *s3.Client
 
@@ -41,6 +48,40 @@ func UploadFile(content io.Reader, fileName string) (*s3.PutObjectOutput, error)
 // GetObjectLink returns the link to the object in the bucket.
 func GetObjectLink(fileName string) string {
 	return "https://" + envcfg.AppConfig.AWS.BucketName + ".s3." + envcfg.AppConfig.AWS.Region + ".amazonaws.com/" + fileName
+}
+
+// GetThumbnailLink asks lambda to create thumbnail and returns the link to the thumbnail of the object in the bucket.
+func GetThumbnailLink(fileName string) (string, error) {
+	lambdaFunctionUrl := envcfg.AppConfig.AWS.LambdaFunctionUrl
+
+	response, err := http.Get(lambdaFunctionUrl + "?videoFileName=" + fileName + "&triggeredBucketName=" + envcfg.AppConfig.AWS.BucketName)
+	if err != nil {
+		return "", err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to get thumbnail link from lambda function, status code: %v", response.StatusCode)
+	}
+
+	responseBody, err := io.ReadAll(response.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var lambdaResponseBody LambdaResponseBody
+	err = json.Unmarshal(responseBody, &lambdaResponseBody)
+	if err != nil {
+		return "", err
+	}
+
+	if lambdaResponseBody.Status != "success" {
+		return "", fmt.Errorf("failed to get thumbnail link from lambda function, status: %v", lambdaResponseBody.Status)
+	}
+
+	thumbnailFileName := lambdaResponseBody.ThumbnailFileName
+
+	return "https://" + envcfg.AppConfig.AWS.BucketName + ".s3." + envcfg.AppConfig.AWS.Region + ".amazonaws.com/" + thumbnailFileName, nil
 }
 
 func main() {

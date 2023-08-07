@@ -23,10 +23,11 @@ type MySQL struct {
 }
 
 type AWS struct {
-	AccessKey  string `mapstructure:"accessKey"`
-	Secret     string `mapstructure:"secret"`
-	Region     string `mapstructure:"region"`
-	BucketName string `mapstructure:"bucketName"`
+	AccessKey         string `mapstructure:"accessKey"`
+	Secret            string `mapstructure:"secret"`
+	Region            string `mapstructure:"region"`
+	BucketName        string `mapstructure:"bucketName"`
+	LambdaFunctionUrl string `mapstructure:"lambdaFunctionUrl"`
 }
 
 // AppConfig == > global variable
@@ -77,6 +78,7 @@ func setDefaultConfig() {
 	viper.SetDefault("aws.secret", "secret")
 	viper.SetDefault("aws.region", "region")
 	viper.SetDefault("aws.bucketName", "bucketName")
+	viper.SetDefault("aws.lambdaFunctionUrl", "lambdaFunctionUrl")
 }
 
 func main() {
