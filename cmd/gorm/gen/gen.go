@@ -19,6 +19,7 @@ type Querier interface {
 func generateModelByGen() {
 	gormgen := gen.NewGenerator(gen.Config{
 		OutPath: "repo",
+		Mode:    gen.WithDefaultQuery,
 	})
 
 	gormDB, err := gorm.Open(mysql.Open(config.AppConfig.DSN))

@@ -131,7 +131,8 @@ type publishDo struct{ gen.DO }
 
 // GetByRoles query data by roles and return it as *slice of pointer*
 //
-//	(The below blank line is required to comment for the generated method)
+//	 (The below blank line is required to comment for the generated method)
+//		//
 //
 // SELECT * FROM @@table WHERE role IN @rolesName
 func (p publishDo) GetByRoles(rolesName []string) (result []*model.Publish, err error) {
@@ -139,7 +140,7 @@ func (p publishDo) GetByRoles(rolesName []string) (result []*model.Publish, err 
 
 	var generateSQL strings.Builder
 	params = append(params, rolesName)
-	generateSQL.WriteString("SELECT * FROM publishes WHERE role IN ? ")
+	generateSQL.WriteString("query data by roles and return it as *slice of pointer* (The below blank line is required to comment for the generated method) // SELECT * FROM publishes WHERE role IN ? ")
 
 	var executeSQL *gorm.DB
 	executeSQL = p.UnderlyingDB().Raw(generateSQL.String(), params...).Find(&result) // ignore_security_alert
