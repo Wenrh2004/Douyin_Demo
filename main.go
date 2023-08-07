@@ -19,6 +19,7 @@ import (
 
 func collectRoutes(route *gin.Engine) *gin.Engine {
 
+	// user
 	//	用户注册
 	route.POST("/register", controller.Register)
 	//	用户登陆
@@ -39,6 +40,9 @@ func main() {
 	}
 	//	启动路由
 	collectRoutes(route)
+
+	publishService := route.Group("/publish")
+	publishService.POST("/action", controller.PublishAction)
 
 	//	启动服务
 	err := route.Run(":5500")
