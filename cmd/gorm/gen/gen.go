@@ -3,6 +3,7 @@ package main
 import (
 	"Douyin_Demo/config"
 	"Douyin_Demo/model"
+	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gen"
 	"gorm.io/gorm"
@@ -19,10 +20,11 @@ type Querier interface {
 func generateModelByGen() {
 	gormgen := gen.NewGenerator(gen.Config{
 		OutPath: "repo",
-		Mode:    gen.WithDefaultQuery,
+		Mode:    gen.WithDefaultQuery | gen.WithQueryInterface | gen.WithoutContext,
 	})
 
 	gormDB, err := gorm.Open(mysql.Open(config.AppConfig.DSN))
+	fmt.Println("gormDB", config.AppConfig.DSN)
 	if err != nil {
 		panic("mysql - database connect error  == > " + err.Error())
 	}

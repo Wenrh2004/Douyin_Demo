@@ -15,6 +15,8 @@ import (
 // DouyinPublishActionServiceImpl implements the last service interface defined in the IDL.
 type DouyinPublishActionServiceImpl struct{}
 
+//var q = repo.Use(repo.DB)
+
 // DouyinPublishAction implements the DouyinPublishActionServiceImpl interface.
 func (s *DouyinPublishActionServiceImpl) DouyinPublishAction(ctx context.Context, req *action.DouyinPublishActionRequest) (resp *action.DouyinPublishActionResponse, err error) {
 	// check if is a valid video file
@@ -52,9 +54,11 @@ func (s *DouyinPublishActionServiceImpl) DouyinPublishAction(ctx context.Context
 		PlayUrl:  fileLink,
 		CoverUrl: coverLink,
 	}
+	fmt.Println("new publish model == > ", newPublishModel)
 
-	// publish.withContext(ctx).Create()
-	err = repo.Q.Publish.WithContext(ctx).Create(&newPublishModel)
+	//repo.Q.New
+	err = repo.Q.WithContext(ctx).Publish.Create(&newPublishModel)
+	//err = q.Publish.WithContext(ctx).Create(&newPublishModel)
 	if err != nil {
 		fmt.Println("create publish error == > ", err.Error())
 		return nil, err

@@ -63,7 +63,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 }
 
 type queryCtx struct {
-	Publish *publishDo
+	Publish IPublishDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"Douyin_Demo/kitex_gen/douyin/publish/action"
+	"Douyin_Demo/repo"
 	"context"
 	"os"
 	"reflect"
@@ -14,6 +15,7 @@ func TestDouyinPublishActionServiceImpl_DouyinPublishAction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	repo.SetDefault(repo.DB)
 
 	var mockNormalRequest = struct {
 		ctx context.Context

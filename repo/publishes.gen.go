@@ -44,7 +44,7 @@ func newPublish(db *gorm.DB, opts ...gen.DOOption) publish {
 }
 
 type publish struct {
-	publishDo publishDo
+	publishDo
 
 	ALL       field.Asterisk
 	ID        field.Uint
@@ -87,14 +87,6 @@ func (p *publish) updateTableName(table string) *publish {
 	return p
 }
 
-func (p *publish) WithContext(ctx context.Context) *publishDo { return p.publishDo.WithContext(ctx) }
-
-func (p publish) TableName() string { return p.publishDo.TableName() }
-
-func (p publish) Alias() string { return p.publishDo.Alias() }
-
-func (p publish) Columns(cols ...field.Expr) gen.Columns { return p.publishDo.Columns(cols...) }
-
 func (p *publish) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 	_f, ok := p.fieldMap[fieldName]
 	if !ok || _f == nil {
@@ -129,6 +121,69 @@ func (p publish) replaceDB(db *gorm.DB) publish {
 
 type publishDo struct{ gen.DO }
 
+type IPublishDo interface {
+	gen.SubQuery
+	Debug() IPublishDo
+	WithContext(ctx context.Context) IPublishDo
+	WithResult(fc func(tx gen.Dao)) gen.ResultInfo
+	ReplaceDB(db *gorm.DB)
+	ReadDB() IPublishDo
+	WriteDB() IPublishDo
+	As(alias string) gen.Dao
+	Session(config *gorm.Session) IPublishDo
+	Columns(cols ...field.Expr) gen.Columns
+	Clauses(conds ...clause.Expression) IPublishDo
+	Not(conds ...gen.Condition) IPublishDo
+	Or(conds ...gen.Condition) IPublishDo
+	Select(conds ...field.Expr) IPublishDo
+	Where(conds ...gen.Condition) IPublishDo
+	Order(conds ...field.Expr) IPublishDo
+	Distinct(cols ...field.Expr) IPublishDo
+	Omit(cols ...field.Expr) IPublishDo
+	Join(table schema.Tabler, on ...field.Expr) IPublishDo
+	LeftJoin(table schema.Tabler, on ...field.Expr) IPublishDo
+	RightJoin(table schema.Tabler, on ...field.Expr) IPublishDo
+	Group(cols ...field.Expr) IPublishDo
+	Having(conds ...gen.Condition) IPublishDo
+	Limit(limit int) IPublishDo
+	Offset(offset int) IPublishDo
+	Count() (count int64, err error)
+	Scopes(funcs ...func(gen.Dao) gen.Dao) IPublishDo
+	Unscoped() IPublishDo
+	Create(values ...*model.Publish) error
+	CreateInBatches(values []*model.Publish, batchSize int) error
+	Save(values ...*model.Publish) error
+	First() (*model.Publish, error)
+	Take() (*model.Publish, error)
+	Last() (*model.Publish, error)
+	Find() ([]*model.Publish, error)
+	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*model.Publish, err error)
+	FindInBatches(result *[]*model.Publish, batchSize int, fc func(tx gen.Dao, batch int) error) error
+	Pluck(column field.Expr, dest interface{}) error
+	Delete(...*model.Publish) (info gen.ResultInfo, err error)
+	Update(column field.Expr, value interface{}) (info gen.ResultInfo, err error)
+	UpdateSimple(columns ...field.AssignExpr) (info gen.ResultInfo, err error)
+	Updates(value interface{}) (info gen.ResultInfo, err error)
+	UpdateColumn(column field.Expr, value interface{}) (info gen.ResultInfo, err error)
+	UpdateColumnSimple(columns ...field.AssignExpr) (info gen.ResultInfo, err error)
+	UpdateColumns(value interface{}) (info gen.ResultInfo, err error)
+	UpdateFrom(q gen.SubQuery) gen.Dao
+	Attrs(attrs ...field.AssignExpr) IPublishDo
+	Assign(attrs ...field.AssignExpr) IPublishDo
+	Joins(fields ...field.RelationField) IPublishDo
+	Preload(fields ...field.RelationField) IPublishDo
+	FirstOrInit() (*model.Publish, error)
+	FirstOrCreate() (*model.Publish, error)
+	FindByPage(offset int, limit int) (result []*model.Publish, count int64, err error)
+	ScanByPage(result interface{}, offset int, limit int) (count int64, err error)
+	Scan(result interface{}) (err error)
+	Returning(value interface{}, columns ...string) IPublishDo
+	UnderlyingDB() *gorm.DB
+	schema.Tabler
+
+	GetByRoles(rolesName []string) (result []*model.Publish, err error)
+}
+
 // GetByRoles query data by roles and return it as *slice of pointer*
 //
 //	 (The below blank line is required to comment for the generated method)
@@ -149,95 +204,95 @@ func (p publishDo) GetByRoles(rolesName []string) (result []*model.Publish, err 
 	return
 }
 
-func (p publishDo) Debug() *publishDo {
+func (p publishDo) Debug() IPublishDo {
 	return p.withDO(p.DO.Debug())
 }
 
-func (p publishDo) WithContext(ctx context.Context) *publishDo {
+func (p publishDo) WithContext(ctx context.Context) IPublishDo {
 	return p.withDO(p.DO.WithContext(ctx))
 }
 
-func (p publishDo) ReadDB() *publishDo {
+func (p publishDo) ReadDB() IPublishDo {
 	return p.Clauses(dbresolver.Read)
 }
 
-func (p publishDo) WriteDB() *publishDo {
+func (p publishDo) WriteDB() IPublishDo {
 	return p.Clauses(dbresolver.Write)
 }
 
-func (p publishDo) Session(config *gorm.Session) *publishDo {
+func (p publishDo) Session(config *gorm.Session) IPublishDo {
 	return p.withDO(p.DO.Session(config))
 }
 
-func (p publishDo) Clauses(conds ...clause.Expression) *publishDo {
+func (p publishDo) Clauses(conds ...clause.Expression) IPublishDo {
 	return p.withDO(p.DO.Clauses(conds...))
 }
 
-func (p publishDo) Returning(value interface{}, columns ...string) *publishDo {
+func (p publishDo) Returning(value interface{}, columns ...string) IPublishDo {
 	return p.withDO(p.DO.Returning(value, columns...))
 }
 
-func (p publishDo) Not(conds ...gen.Condition) *publishDo {
+func (p publishDo) Not(conds ...gen.Condition) IPublishDo {
 	return p.withDO(p.DO.Not(conds...))
 }
 
-func (p publishDo) Or(conds ...gen.Condition) *publishDo {
+func (p publishDo) Or(conds ...gen.Condition) IPublishDo {
 	return p.withDO(p.DO.Or(conds...))
 }
 
-func (p publishDo) Select(conds ...field.Expr) *publishDo {
+func (p publishDo) Select(conds ...field.Expr) IPublishDo {
 	return p.withDO(p.DO.Select(conds...))
 }
 
-func (p publishDo) Where(conds ...gen.Condition) *publishDo {
+func (p publishDo) Where(conds ...gen.Condition) IPublishDo {
 	return p.withDO(p.DO.Where(conds...))
 }
 
-func (p publishDo) Order(conds ...field.Expr) *publishDo {
+func (p publishDo) Order(conds ...field.Expr) IPublishDo {
 	return p.withDO(p.DO.Order(conds...))
 }
 
-func (p publishDo) Distinct(cols ...field.Expr) *publishDo {
+func (p publishDo) Distinct(cols ...field.Expr) IPublishDo {
 	return p.withDO(p.DO.Distinct(cols...))
 }
 
-func (p publishDo) Omit(cols ...field.Expr) *publishDo {
+func (p publishDo) Omit(cols ...field.Expr) IPublishDo {
 	return p.withDO(p.DO.Omit(cols...))
 }
 
-func (p publishDo) Join(table schema.Tabler, on ...field.Expr) *publishDo {
+func (p publishDo) Join(table schema.Tabler, on ...field.Expr) IPublishDo {
 	return p.withDO(p.DO.Join(table, on...))
 }
 
-func (p publishDo) LeftJoin(table schema.Tabler, on ...field.Expr) *publishDo {
+func (p publishDo) LeftJoin(table schema.Tabler, on ...field.Expr) IPublishDo {
 	return p.withDO(p.DO.LeftJoin(table, on...))
 }
 
-func (p publishDo) RightJoin(table schema.Tabler, on ...field.Expr) *publishDo {
+func (p publishDo) RightJoin(table schema.Tabler, on ...field.Expr) IPublishDo {
 	return p.withDO(p.DO.RightJoin(table, on...))
 }
 
-func (p publishDo) Group(cols ...field.Expr) *publishDo {
+func (p publishDo) Group(cols ...field.Expr) IPublishDo {
 	return p.withDO(p.DO.Group(cols...))
 }
 
-func (p publishDo) Having(conds ...gen.Condition) *publishDo {
+func (p publishDo) Having(conds ...gen.Condition) IPublishDo {
 	return p.withDO(p.DO.Having(conds...))
 }
 
-func (p publishDo) Limit(limit int) *publishDo {
+func (p publishDo) Limit(limit int) IPublishDo {
 	return p.withDO(p.DO.Limit(limit))
 }
 
-func (p publishDo) Offset(offset int) *publishDo {
+func (p publishDo) Offset(offset int) IPublishDo {
 	return p.withDO(p.DO.Offset(offset))
 }
 
-func (p publishDo) Scopes(funcs ...func(gen.Dao) gen.Dao) *publishDo {
+func (p publishDo) Scopes(funcs ...func(gen.Dao) gen.Dao) IPublishDo {
 	return p.withDO(p.DO.Scopes(funcs...))
 }
 
-func (p publishDo) Unscoped() *publishDo {
+func (p publishDo) Unscoped() IPublishDo {
 	return p.withDO(p.DO.Unscoped())
 }
 
@@ -303,22 +358,22 @@ func (p publishDo) FindInBatches(result *[]*model.Publish, batchSize int, fc fun
 	return p.DO.FindInBatches(result, batchSize, fc)
 }
 
-func (p publishDo) Attrs(attrs ...field.AssignExpr) *publishDo {
+func (p publishDo) Attrs(attrs ...field.AssignExpr) IPublishDo {
 	return p.withDO(p.DO.Attrs(attrs...))
 }
 
-func (p publishDo) Assign(attrs ...field.AssignExpr) *publishDo {
+func (p publishDo) Assign(attrs ...field.AssignExpr) IPublishDo {
 	return p.withDO(p.DO.Assign(attrs...))
 }
 
-func (p publishDo) Joins(fields ...field.RelationField) *publishDo {
+func (p publishDo) Joins(fields ...field.RelationField) IPublishDo {
 	for _, _f := range fields {
 		p = *p.withDO(p.DO.Joins(_f))
 	}
 	return &p
 }
 
-func (p publishDo) Preload(fields ...field.RelationField) *publishDo {
+func (p publishDo) Preload(fields ...field.RelationField) IPublishDo {
 	for _, _f := range fields {
 		p = *p.withDO(p.DO.Preload(_f))
 	}
