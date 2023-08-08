@@ -38,3 +38,8 @@ const (
 	User_NORMAL = "normalUser"
 	Issuer      = "Auth_server"
 )
+
+const (
+	STATUS_SUCCESS = 0
+	STATUS_FAILED  = 1
+)

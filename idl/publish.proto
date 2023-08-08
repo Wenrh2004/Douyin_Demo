@@ -1,0 +1,18 @@
+syntax = "proto3";
+package douyin.publish.action;
+option go_package = "douyin/publish/action";
+
+message DouyinPublishActionRequest {
+   string token = 1; // 用户鉴权token
+   bytes data = 2; // 视频数据
+   string title = 3; // 视频标题
+}
+
+message DouyinPublishActionResponse {
+   int32 status_code = 1; // 状态码，0-成功，其他值-失败
+  optional string status_msg = 2; // 返回状态描述
+}
+
+service DouyinPublishActionService {
+   rpc DouyinPublishAction(DouyinPublishActionRequest) returns (DouyinPublishActionResponse) {}
+}
