@@ -54,7 +54,7 @@ func GetObjectLink(fileName string) string {
 func GetThumbnailLink(fileName string) (string, error) {
 	lambdaFunctionUrl := envcfg.AppConfig.AWS.LambdaFunctionUrl
 
-	response, err := http.Get(lambdaFunctionUrl + "?videoFileName=" + fileName + "&triggeredBucketName=" + envcfg.AppConfig.AWS.BucketName)
+	response, err := http.Get(lambdaFunctionUrl + "?videoFileName=" + fileName + "&triggerBucketName=" + envcfg.AppConfig.AWS.BucketName)
 	if err != nil {
 		return "", err
 	}

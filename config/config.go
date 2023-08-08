@@ -3,6 +3,8 @@ package config
 import (
 	"fmt"
 	"github.com/spf13/viper"
+	"os"
+	"path/filepath"
 )
 
 type AppConfigSchema struct {
@@ -41,8 +43,21 @@ func init() {
 
 // readConfig == > get whole configuration properties
 func readConfig() {
+	path, err := os.Getwd()
+	if err != nil {
+		panic("get current path error+" + err.Error())
+	}
+	// trim the path to the project root
+	rootDir := findProjectRoot(path)
+	if rootDir == "" {
+		panic("can not find project root directory")
+	}
+
+	// set the configuration file path
+	configFilePath := filepath.Join(rootDir, "application.yaml")
+
 	viper.SetConfigType("yaml")
-	viper.SetConfigFile("application.yaml")
+	viper.SetConfigFile(configFilePath)
 
 	setDefaultConfig()
 
@@ -51,6 +66,23 @@ func readConfig() {
 			panic("config file can not be founded")
 		}
 		panic("config file read error+" + err.Error())
+	}
+}
+
+func findProjectRoot(cwd string) string {
+	// Traverse up the directory tree until the project root directory is found
+	for {
+		if cwd == "" || cwd == "/" {
+			return ""
+		}
+
+		// Check if the current directory contains the "Douyin_Demo" directory
+		if filepath.Base(cwd) == "Douyin_Demo" {
+			return cwd
+		}
+
+		// Move up one level in the directory tree
+		cwd = filepath.Dir(cwd)
 	}
 }
 

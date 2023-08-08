@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
+	"net/http"
 )
 
 // DouyinPublishActionServiceImpl implements the last service interface defined in the IDL.
@@ -16,6 +17,11 @@ type DouyinPublishActionServiceImpl struct{}
 
 // DouyinPublishAction implements the DouyinPublishActionServiceImpl interface.
 func (s *DouyinPublishActionServiceImpl) DouyinPublishAction(ctx context.Context, req *action.DouyinPublishActionRequest) (resp *action.DouyinPublishActionResponse, err error) {
+	// check if is a valid video file
+	if http.DetectContentType(req.Data) != "video/mp4" {
+		return nil, fmt.Errorf("invalid video file")
+	}
+
 	// video file upload to s3
 	fileReader := bytes.NewReader(req.Data)
 	fileId := uuid.New().String()

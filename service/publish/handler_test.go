@@ -4,6 +4,7 @@ import (
 	"Douyin_Demo/kitex_gen/douyin/publish/action"
 	"context"
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -14,7 +15,7 @@ func TestDouyinPublishActionServiceImpl_DouyinPublishAction(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var mockRequest = struct {
+	var mockNormalRequest = struct {
 		ctx context.Context
 		req *action.DouyinPublishActionRequest
 	}{
@@ -24,6 +25,18 @@ func TestDouyinPublishActionServiceImpl_DouyinPublishAction(t *testing.T) {
 			Data:  testFile,
 			Token: "123456",
 		}}
+
+	var mockInvalidRequest = struct {
+		ctx context.Context
+		req *action.DouyinPublishActionRequest
+	}{
+		ctx: context.Background(),
+		req: &action.DouyinPublishActionRequest{
+			Title: "InvaildVideo",
+			Data:  []byte{1, 2, 3, 4, 5},
+			Token: "23455",
+		},
+	}
 
 	// expected result
 	var successResult = &action.DouyinPublishActionResponse{
@@ -42,9 +55,14 @@ func TestDouyinPublishActionServiceImpl_DouyinPublishAction(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "success",
-			args: mockRequest,
+			name: "portaittestmp4",
+			args: mockNormalRequest,
 			want: successResult,
+		},
+		{
+			name:    "invalidvideo",
+			args:    mockInvalidRequest,
+			wantErr: true,
 		},
 	}
 
@@ -56,7 +74,7 @@ func TestDouyinPublishActionServiceImpl_DouyinPublishAction(t *testing.T) {
 				t.Errorf("DouyinPublishActionServiceImpl.DouyinPublishAction() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got.StatusCode != tt.want.StatusCode {
+			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("DouyinPublishActionServiceImpl.DouyinPublishAction() = %v, want %v", got, tt.want)
 			}
 		})
