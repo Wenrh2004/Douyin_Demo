@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"Douyin_Demo/Constants"
+	"Douyin_Demo/constants"
 	"Douyin_Demo/kitex_gen/douyin/publish/action"
 	"Douyin_Demo/kitex_gen/douyin/publish/action/douyinpublishactionservice"
 	"github.com/gin-gonic/gin"
@@ -19,7 +19,7 @@ func PublishAction(ctx *gin.Context) {
 
 	if err != nil {
 		ctx.JSON(http.StatusOK, gin.H{
-			"status_code": Constants.STATUS_FAILED,
+			"status_code": constants.STATUS_FAILED,
 			"status_msg":  err.Error(),
 		})
 		return
@@ -27,7 +27,7 @@ func PublishAction(ctx *gin.Context) {
 
 	//	返回结果
 	ctx.JSON(http.StatusOK, gin.H{
-		"status_code": Constants.STATUS_SUCCESS,
+		"status_code": constants.STATUS_SUCCESS,
 	})
 
 	return
