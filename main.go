@@ -44,6 +44,9 @@ func main() {
 	publishService := route.Group("/publish")
 	publishService.POST("/action", controller.PublishAction)
 
+	feedService := route.Group("/feed")
+	feedService.GET("/", controller.FeedAction)
+
 	//	启动服务
 	err := route.Run(":5500")
 	if err != nil {
