@@ -32,7 +32,7 @@ func (s *FeedServiceImpl) GetVideoFeed(ctx context.Context, req *feed.FeedReques
 	// nextTime is the last time of the feed list
 	var nextTime int64
 	if len(feedList) > 0 {
-		nextTime = feedList[len(feedList)].CreatedAt.UnixMilli()
+		nextTime = feedList[len(feedList)-1].CreatedAt.UnixMilli()
 	} else {
 		nextTime = latestTime
 	}
