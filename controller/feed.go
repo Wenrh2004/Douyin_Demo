@@ -9,6 +9,14 @@ import (
 
 var feedServiceClient feedservice.Client
 
+func init() {
+	var err error
+	feedServiceClient, err = feedservice.NewClient("feed")
+	if err != nil {
+		panic(err)
+	}
+}
+
 func FeedAction(ctx *gin.Context) {
 	//	获取参数
 	var req feed.FeedRequest
