@@ -17,34 +17,41 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// collectRoutes ==> The function then sets up routes for handling user registration and login requests.
+// There are two POST routers in this function，which are register and login.
+// The register and login endpoint which calls the Register and Login functions from the controller.
 func collectRoutes(route *gin.Engine) *gin.Engine {
 
 	// user
-	//	用户注册
+	// User Login
 	route.POST("/register", controller.Register)
-	//	用户登陆
+	// User Login
 	route.POST("/login", controller.Login)
 
 	return route
 }
 
 func main() {
-	//	获取初始化数据库
+
+	// Get the initialization database
 	common.InitDB()
-	//	创建路由
+	common.InitMongoDB()
+
+	// Create routes
 	route := gin.Default()
 	route.ForwardedByClientIP = true
 	proxyErr := route.SetTrustedProxies([]string{"127.0.0.1"})
 	if proxyErr != nil {
 		panic(proxyErr)
 	}
-	//	启动路由
+
+	// Start routing
 	collectRoutes(route)
 
 	publishService := route.Group("/publish")
 	publishService.POST("/action", controller.PublishAction)
 
-	//	启动服务
+	// Run service on 5500
 	err := route.Run(":5500")
 	if err != nil {
 		panic("service start failed" + err.Error())
