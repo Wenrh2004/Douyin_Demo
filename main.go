@@ -11,7 +11,6 @@
 package main
 
 import (
-	"Douyin_Demo/common"
 	"Douyin_Demo/controller"
 
 	"github.com/gin-gonic/gin"
@@ -30,7 +29,7 @@ func collectRoutes(route *gin.Engine) *gin.Engine {
 
 func main() {
 	//	获取初始化数据库
-	common.InitDB()
+	// common.InitDB()
 	//	创建路由
 	route := gin.Default()
 	route.ForwardedByClientIP = true
@@ -43,6 +42,9 @@ func main() {
 
 	publishService := route.Group("/publish")
 	publishService.POST("/action", controller.PublishAction)
+
+	feedService := route.Group("/feed")
+	feedService.GET("/", controller.FeedAction)
 
 	//	启动服务
 	err := route.Run(":5500")

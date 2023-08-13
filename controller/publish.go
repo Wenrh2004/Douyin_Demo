@@ -1,14 +1,30 @@
 package controller
 
 import (
+	"Douyin_Demo/config"
 	"Douyin_Demo/constants"
 	"Douyin_Demo/kitex_gen/douyin/publish/action"
 	"Douyin_Demo/kitex_gen/douyin/publish/action/douyinpublishactionservice"
+	"github.com/cloudwego/kitex/client"
 	"github.com/gin-gonic/gin"
+	consul "github.com/kitex-contrib/registry-consul"
+	"log"
 	"net/http"
 )
 
 var publishServiceClient douyinpublishactionservice.Client
+
+func init() {
+	r, err := consul.NewConsulResolver(config.AppConfig.CONSUL_ADDRESS)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	publishServiceClient, err = douyinpublishactionservice.NewClient(config.PublishServiceName, client.WithResolver(r))
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
 func PublishAction(ctx *gin.Context) {
 	// get parameter

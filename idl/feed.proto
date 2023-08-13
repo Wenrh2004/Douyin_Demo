@@ -1,13 +1,13 @@
 syntax = "proto3";
-package feed;
-option go_package = "feed";
+package douyin.feed;
+option go_package = "douyin/feed";
 
-message DouyinFeedRequest {
+message FeedRequest {
   optional int64 latest_time = 1; // 可选参数，限制返回视频的最新投稿时间戳，精确到秒，不填表示当前时间
   optional string token = 2; // 可选参数，登录用户设置
 }
 
-message DouyinFeedResponse {
+message FeedResponse {
   int32 status_code = 1; // 状态码，0-成功，其他值-失败
   optional string status_msg = 2; // 返回状态描述
   repeated Video video_list = 3; // 视频列表
@@ -40,7 +40,7 @@ message User {
 }
 
 // 视频流服务
-service DouyinFeedService {
+service FeedService {
   // 不限制登录状态，返回按投稿时间倒序的视频列表
-  rpc GetDouyinFeed(DouyinFeedRequest) returns (DouyinFeedResponse) {}
+  rpc GetVideoFeed(FeedRequest) returns (FeedResponse) {}
 }
