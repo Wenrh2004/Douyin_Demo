@@ -1,6 +1,6 @@
 syntax = "proto3";
 package douyin.publish.action;
-option go_package = "douyin/publish/action";
+option go_package = "douyin/publish";
 
 message DouyinPublishActionRequest {
    string token = 1; // 用户鉴权token
@@ -13,6 +13,6 @@ message DouyinPublishActionResponse {
   optional string status_msg = 2; // 返回状态描述
 }
 
-service DouyinPublishActionService {
+service PublishService {
    rpc DouyinPublishAction(DouyinPublishActionRequest) returns (DouyinPublishActionResponse) {}
 }
