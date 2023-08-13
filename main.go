@@ -24,9 +24,13 @@ func collectRoutes(route *gin.Engine) *gin.Engine {
 
 	// user
 	// User Login
-	route.POST("/register", controller.Register)
+	route.POST("/douyin/user/register", controller.Register)
 	// User Login
-	route.POST("/login", controller.Login)
+	route.POST("/douyin/user/login", controller.Login)
+
+	// message
+	// Get message
+	route.GET("/douyin/message/chat", controller.GetMessage)
 
 	return route
 }

@@ -54,28 +54,3 @@ var Manager = UserManager{
 	Register:   make(chan *User),
 	Unregister: make(chan *User),
 }
-
-for {
-	case conn := <-Manager.Register:
-		log.Println("A new socket has connected.",conn.ID)
-		Manager.Clients[conn.ID] = conn
-		replyMessage := &ReceiveMessages {
-			Code:    e.WebSocketSuccess,
-			Content: "connect success",
-		}
-		message, _ := json.Marshal(replyMessage)
-		_ = conn.Socket.WriteMessage(websocket.TextMessage, message)
-		
-	case conn := <-Manager.Unregister:
-		log.Println("A socket hasn't disconnected.",conn.ID)
-		if _, ok := Manager.Clients[conn.ID]; ok {
-			replyMessage := &ReplyMessages {
-				Code:    e.WebSocketEnd,
-				Context: "connect broken",
-			}
-			message, _ := json.Marshal(replyMessage)
-			_ = conn.Socket.WriteMessage(websocket.TextMessage, message)
-			close(conn.Send)
-			delete(Manager.Clients, conn.ID)
-		}
-}
