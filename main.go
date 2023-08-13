@@ -11,7 +11,6 @@
 package main
 
 import (
-	"Douyin_Demo/common"
 	"Douyin_Demo/controller"
 
 	"github.com/gin-gonic/gin"
@@ -54,6 +53,10 @@ func main() {
 
 	publishService := route.Group("/publish")
 	publishService.POST("/action", controller.PublishAction)
+
+
+	feedService := route.Group("/feed")
+	feedService.GET("/", controller.FeedAction)
 
 	// Run service on 5500
 	err := route.Run(":5500")

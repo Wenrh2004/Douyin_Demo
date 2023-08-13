@@ -2,12 +2,13 @@ package main
 
 import (
 	"Douyin_Demo/config"
-	action "Douyin_Demo/kitex_gen/douyin/publish/action/douyinpublishactionservice"
+	feed "Douyin_Demo/kitex_gen/douyin/feed/feedservice"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
-	consul "github.com/kitex-contrib/registry-consul"
 	"log"
 	"net"
+
+	consul "github.com/kitex-contrib/registry-consul"
 )
 
 func main() {
@@ -16,21 +17,21 @@ func main() {
 		log.Fatal(err)
 	}
 
-	addr, err := net.ResolveTCPAddr("tcp", config.PublishServicePort)
+	addr, err := net.ResolveTCPAddr("tcp", config.FeedServicePort)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	svr := action.NewServer(new(DouyinPublishActionServiceImpl),
+	svr := feed.NewServer(new(FeedServiceImpl),
 		server.WithRegistry(r),
 		server.WithServiceAddr(addr),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{
-			ServiceName: config.PublishServiceName,
+			ServiceName: config.FeedServiceName,
 		}))
 
 	err = svr.Run()
 
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal(err)
 	}
 }
