@@ -1,19 +1,27 @@
 package controller
 
 import (
+	"Douyin_Demo/config"
 	"Douyin_Demo/constants"
 	"Douyin_Demo/kitex_gen/douyin/feed"
 	"Douyin_Demo/kitex_gen/douyin/feed/feedservice"
+	"github.com/cloudwego/kitex/client"
 	"github.com/gin-gonic/gin"
+	consul "github.com/kitex-contrib/registry-consul"
+	"log"
 )
 
 var feedServiceClient feedservice.Client
 
 func init() {
-	var err error
-	feedServiceClient, err = feedservice.NewClient("feed")
+	r, err := consul.NewConsulResolver(config.AppConfig.CONSUL_ADDRESS)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
+	}
+
+	feedServiceClient, err = feedservice.NewClient(config.FeedServiceName, client.WithResolver(r))
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
