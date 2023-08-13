@@ -36,6 +36,9 @@ type AWS struct {
 const (
 	FeedServiceName = "feed-service"
 	FeedServicePort = ":9010"
+
+	PublishServiceName = "publish-service"
+	PublishServicePort = ":9011"
 )
 
 // AppConfig == > global variable
