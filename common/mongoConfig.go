@@ -10,8 +10,9 @@ import (
 )
 
 type MongoDB struct {
-	passWord string
-	userName string
+	passWord    string
+	userName    string
+	databaseURL string
 }
 
 func getMongoDBConfig() *MongoDB {
@@ -24,8 +25,9 @@ func getMongoDBConfig() *MongoDB {
 		panic("config file read error+" + err.Error())
 	}
 	return &MongoDB{
-		passWord: viper.GetString("mongodb.password"),
-		userName: viper.GetString("mongodb.username"),
+		passWord:    viper.GetString("mongodb.password"),
+		userName:    viper.GetString("mongodb.username"),
+		databaseURL: viper.GetString("mongodb.databaseURL"),
 	}
 }
 
@@ -35,7 +37,7 @@ func getMongoDBConfig() *MongoDB {
 // 3. Send a ping to confirm a successful connection
 func InitMongoDB() {
 	var config = getMongoDBConfig()
-	dsn := fmt.Sprintf("mongodb+srv://%s:%s@douyin.js4evzp.mongodb.net/?retryWrites=true&w=majority", config.userName, config.passWord)
+	dsn := fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority", config.userName, config.passWord, config.databaseURL)
 	// Use the SetServerAPIOptions() method to set the Stable API version to 1
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI(dsn).SetServerAPIOptions(serverAPI)
