@@ -9,9 +9,10 @@ import (
 
 type AppConfigSchema struct {
 	// DataBase
-	Database MySQL `mapstructure:"mysql"`
-	DSN      string
-	AWS      AWS `mapstructure:"aws"`
+	Database       MySQL `mapstructure:"mysql"`
+	DSN            string
+	AWS            AWS    `mapstructure:"aws"`
+	CONSUL_ADDRESS string `mapstructure:"consulAddress"`
 }
 
 // MySQL  == > mysql-database Yaml map to JSON
@@ -31,6 +32,11 @@ type AWS struct {
 	BucketName        string `mapstructure:"bucketName"`
 	LambdaFunctionUrl string `mapstructure:"lambdaFunctionUrl"`
 }
+
+const (
+	FeedServiceName = "feed-service"
+	FeedServicePort = ":9010"
+)
 
 // AppConfig == > global variable
 var AppConfig = AppConfigSchema{}
@@ -111,6 +117,9 @@ func setDefaultConfig() {
 	viper.SetDefault("aws.region", "region")
 	viper.SetDefault("aws.bucketName", "bucketName")
 	viper.SetDefault("aws.lambdaFunctionUrl", "lambdaFunctionUrl")
+
+	// consul
+	viper.SetDefault("CONSUL_ADDRESS", "http://localhost:8500")
 }
 
 func main() {
