@@ -11,51 +11,43 @@
 package main
 
 import (
-	"Douyin_Demo/common"
 	"Douyin_Demo/controller"
 
 	"github.com/gin-gonic/gin"
 )
 
-// collectRoutes ==> The function then sets up routes for handling user registration and login requests.
-// There are two POST routers in this function，which are register and login.
-// The register and login endpoint which calls the Register and Login functions from the controller.
 func collectRoutes(route *gin.Engine) *gin.Engine {
 
 	// user
-	// User Login
-	route.POST("/douyin/user/register", controller.Register)
-	// User Login
-	route.POST("/douyin/user/login", controller.Login)
-
-	// message
-	// Get message
-	route.GET("/douyin/message/chat", controller.GetMessage)
+	//	用户注册
+	route.POST("/register", controller.Register)
+	//	用户登陆
+	route.POST("/login", controller.Login)
 
 	return route
 }
 
 func main() {
-
-	// Get the initialization database
-	common.InitDB()
-	common.InitMongoDB()
-
-	// Create routes
+	//	获取初始化数据库
+	// common.InitDB()
+	//	创建路由
 	route := gin.Default()
 	route.ForwardedByClientIP = true
 	proxyErr := route.SetTrustedProxies([]string{"127.0.0.1"})
 	if proxyErr != nil {
 		panic(proxyErr)
 	}
-
-	// Start routing
+	//	启动路由
 	collectRoutes(route)
 
 	publishService := route.Group("/publish")
-	publishService.POST("/action", controller.PublishAction)
+	publishService.POST("/action", controller.PublishActionController)
+	publishService.GET("/list", controller.PublishListController)
 
-	// Run service on 5500
+	feedService := route.Group("/feed")
+	feedService.GET("/", controller.FeedAction)
+
+	//	启动服务
 	err := route.Run(":5500")
 	if err != nil {
 		panic("service start failed" + err.Error())
