@@ -1,6 +1,8 @@
 syntax = "proto3";
 package douyin.publish.action;
-option go_package = "douyin/publish/action";
+option go_package = "douyin/publish";
+
+import "feed.proto";
 
 message DouyinPublishActionRequest {
    string token = 1; // 用户鉴权token
@@ -13,6 +15,18 @@ message DouyinPublishActionResponse {
   optional string status_msg = 2; // 返回状态描述
 }
 
-service DouyinPublishActionService {
+message PublishListRequest {
+    int64 user_id = 1; // 用户id
+    string token = 2; // 用户鉴权token
+}
+
+message PublishListResponse {
+    int32 status_code = 1; // 状态码，0-成功，其他值-失败
+   optional string status_msg = 2; // 返回状态描述
+   repeated douyin.feed.Video video_list = 3; // 用户发布的视频列表
+}
+
+service PublishService {
    rpc DouyinPublishAction(DouyinPublishActionRequest) returns (DouyinPublishActionResponse) {}
+   rpc PublishList(PublishListRequest) returns (PublishListResponse) {}
 }

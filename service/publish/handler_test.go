@@ -1,7 +1,8 @@
 package main
 
 import (
-	"Douyin_Demo/kitex_gen/douyin/publish/action"
+	"Douyin_Demo/kitex_gen/douyin/feed"
+	"Douyin_Demo/kitex_gen/douyin/publish"
 	"Douyin_Demo/repo"
 	"context"
 	"os"
@@ -9,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestDouyinPublishActionServiceImpl_DouyinPublishAction(t *testing.T) {
+func TestPublishServiceImpl_DouyinPublishAction(t *testing.T) {
 	// get video file in curent directory
 	testFile, err := os.ReadFile("./resource/test.mp4")
 	if err != nil {
@@ -19,10 +20,10 @@ func TestDouyinPublishActionServiceImpl_DouyinPublishAction(t *testing.T) {
 
 	var mockNormalRequest = struct {
 		ctx context.Context
-		req *action.DouyinPublishActionRequest
+		req *publish.DouyinPublishActionRequest
 	}{
 		ctx: context.Background(),
-		req: &action.DouyinPublishActionRequest{
+		req: &publish.DouyinPublishActionRequest{
 			Title: "TestVideo",
 			Data:  testFile,
 			Token: "123456",
@@ -30,10 +31,10 @@ func TestDouyinPublishActionServiceImpl_DouyinPublishAction(t *testing.T) {
 
 	var mockInvalidRequest = struct {
 		ctx context.Context
-		req *action.DouyinPublishActionRequest
+		req *publish.DouyinPublishActionRequest
 	}{
 		ctx: context.Background(),
-		req: &action.DouyinPublishActionRequest{
+		req: &publish.DouyinPublishActionRequest{
 			Title: "InvaildVideo",
 			Data:  []byte{1, 2, 3, 4, 5},
 			Token: "23455",
@@ -41,19 +42,19 @@ func TestDouyinPublishActionServiceImpl_DouyinPublishAction(t *testing.T) {
 	}
 
 	// expected result
-	var successResult = &action.DouyinPublishActionResponse{
+	var successResult = &publish.DouyinPublishActionResponse{
 		StatusCode: 0,
 	}
 
 	type args struct {
 		ctx context.Context
-		req *action.DouyinPublishActionRequest
+		req *publish.DouyinPublishActionRequest
 	}
 
 	tests := []struct {
 		name    string
 		args    args
-		want    *action.DouyinPublishActionResponse
+		want    *publish.DouyinPublishActionResponse
 		wantErr bool
 	}{
 		{
@@ -70,7 +71,7 @@ func TestDouyinPublishActionServiceImpl_DouyinPublishAction(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &DouyinPublishActionServiceImpl{}
+			s := &PublishServiceImpl{}
 			got, err := s.DouyinPublishAction(tt.args.ctx, tt.args.req)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DouyinPublishActionServiceImpl.DouyinPublishAction() error = %v, wantErr %v", err, tt.wantErr)
@@ -82,4 +83,56 @@ func TestDouyinPublishActionServiceImpl_DouyinPublishAction(t *testing.T) {
 		})
 	}
 
+}
+
+func TestPublishServiceImpl_PublishList(t *testing.T) {
+	repo.SetDefault(repo.DB)
+
+	type args struct {
+		ctx context.Context
+		req *publish.PublishListRequest
+	}
+
+	var mockRequest = args{
+		ctx: context.Background(),
+		req: &publish.PublishListRequest{
+			UserId: int64(123456),
+			Token:  "234567",
+		},
+	}
+
+	var successResult = &publish.PublishListResponse{
+		StatusCode: 0,
+		VideoList:  []*feed.Video{},
+	}
+
+	test := []struct {
+		name    string
+		args    args
+		want    *publish.PublishListResponse
+		wantErr bool
+	}{
+		{
+			name: "normal",
+			args: mockRequest,
+			want: successResult,
+		},
+	}
+
+	for _, tt := range test {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &PublishServiceImpl{}
+			got, err := s.PublishList(tt.args.ctx, tt.args.req)
+			if len(got.VideoList) != 3 {
+				t.Errorf("PublishServiceImpl.PublishList() = %v, want %v", got, tt.want)
+			}
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PublishServiceImpl.PublishList() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got.StatusCode, tt.want.StatusCode) {
+				t.Errorf("PublishServiceImpl.PublishList() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

@@ -2,7 +2,7 @@ package main
 
 import (
 	"Douyin_Demo/config"
-	action "Douyin_Demo/kitex_gen/douyin/publish/action/douyinpublishactionservice"
+	publish "Douyin_Demo/kitex_gen/douyin/publish/publishservice"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
 	consul "github.com/kitex-contrib/registry-consul"
@@ -21,7 +21,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	svr := action.NewServer(new(DouyinPublishActionServiceImpl),
+	svr := publish.NewServer(new(PublishServiceImpl),
 		server.WithRegistry(r),
 		server.WithServiceAddr(addr),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{

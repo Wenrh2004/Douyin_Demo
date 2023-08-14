@@ -41,7 +41,8 @@ func main() {
 	collectRoutes(route)
 
 	publishService := route.Group("/publish")
-	publishService.POST("/action", controller.PublishAction)
+	publishService.POST("/action", controller.PublishActionController)
+	publishService.GET("/list", controller.PublishListController)
 
 	feedService := route.Group("/feed")
 	feedService.GET("/", controller.FeedAction)
