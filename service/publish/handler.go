@@ -64,3 +64,9 @@ func (s *PublishServiceImpl) DouyinPublishAction(ctx context.Context, req *publi
 
 	return &publish.DouyinPublishActionResponse{}, nil
 }
+
+// PublishList implements the PublishServiceImpl interface.
+func (s *PublishServiceImpl) PublishList(ctx context.Context, req *publish.PublishListRequest) (resp *publish.PublishListResponse, err error) {
+	// TODO: Your code here...
+	return
+}

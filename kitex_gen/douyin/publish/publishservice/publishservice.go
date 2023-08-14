@@ -23,6 +23,7 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	handlerType := (*publish.PublishService)(nil)
 	methods := map[string]kitex.MethodInfo{
 		"DouyinPublishAction": kitex.NewMethodInfo(douyinPublishActionHandler, newDouyinPublishActionArgs, newDouyinPublishActionResult, false),
+		"PublishList":         kitex.NewMethodInfo(publishListHandler, newPublishListArgs, newPublishListResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName": "douyin.publish.action",
@@ -191,6 +192,159 @@ func (p *DouyinPublishActionResult) GetResult() interface{} {
 	return p.Success
 }
 
+func publishListHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(publish.PublishListRequest)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(publish.PublishService).PublishList(ctx, req)
+		if err != nil {
+			return err
+		}
+		if err := st.SendMsg(resp); err != nil {
+			return err
+		}
+	case *PublishListArgs:
+		success, err := handler.(publish.PublishService).PublishList(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*PublishListResult)
+		realResult.Success = success
+	}
+	return nil
+}
+func newPublishListArgs() interface{} {
+	return &PublishListArgs{}
+}
+
+func newPublishListResult() interface{} {
+	return &PublishListResult{}
+}
+
+type PublishListArgs struct {
+	Req *publish.PublishListRequest
+}
+
+func (p *PublishListArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(publish.PublishListRequest)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *PublishListArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *PublishListArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *PublishListArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, fmt.Errorf("No req in PublishListArgs")
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *PublishListArgs) Unmarshal(in []byte) error {
+	msg := new(publish.PublishListRequest)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var PublishListArgs_Req_DEFAULT *publish.PublishListRequest
+
+func (p *PublishListArgs) GetReq() *publish.PublishListRequest {
+	if !p.IsSetReq() {
+		return PublishListArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *PublishListArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *PublishListArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type PublishListResult struct {
+	Success *publish.PublishListResponse
+}
+
+var PublishListResult_Success_DEFAULT *publish.PublishListResponse
+
+func (p *PublishListResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(publish.PublishListResponse)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *PublishListResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *PublishListResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *PublishListResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, fmt.Errorf("No req in PublishListResult")
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *PublishListResult) Unmarshal(in []byte) error {
+	msg := new(publish.PublishListResponse)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *PublishListResult) GetSuccess() *publish.PublishListResponse {
+	if !p.IsSetSuccess() {
+		return PublishListResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *PublishListResult) SetSuccess(x interface{}) {
+	p.Success = x.(*publish.PublishListResponse)
+}
+
+func (p *PublishListResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *PublishListResult) GetResult() interface{} {
+	return p.Success
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -206,6 +360,16 @@ func (p *kClient) DouyinPublishAction(ctx context.Context, Req *publish.DouyinPu
 	_args.Req = Req
 	var _result DouyinPublishActionResult
 	if err = p.c.Call(ctx, "DouyinPublishAction", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) PublishList(ctx context.Context, Req *publish.PublishListRequest) (r *publish.PublishListResponse, err error) {
+	var _args PublishListArgs
+	_args.Req = Req
+	var _result PublishListResult
+	if err = p.c.Call(ctx, "PublishList", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
