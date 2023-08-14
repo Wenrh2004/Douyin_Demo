@@ -21,7 +21,12 @@ type PublishServiceImpl struct{}
 func (s *PublishServiceImpl) DouyinPublishAction(ctx context.Context, req *publish.DouyinPublishActionRequest) (resp *publish.DouyinPublishActionResponse, err error) {
 	// check if is a valid video file
 	if http.DetectContentType(req.Data) != "video/mp4" {
-		return nil, fmt.Errorf("invalid video file")
+		// TODO log error
+		msg := constants.INVALID_CONTENT_TYPE
+		return &publish.DouyinPublishActionResponse{
+			StatusCode: constants.PARAMS_ERROR_CODE,
+			StatusMsg:  &msg,
+		}, nil
 	}
 
 	// video file upload to s3
@@ -33,17 +38,28 @@ func (s *PublishServiceImpl) DouyinPublishAction(ctx context.Context, req *publi
 	fileName := fmt.Sprintf("%s-%s.mp4", userId, fileId)
 	_, err = storage.UploadFile(fileReader, fileName)
 	if err != nil {
-		fmt.Println("upload file error == > ", err.Error())
-		return nil, err
+		// TODO log error
+		msg := constants.UPLOAD_FAILED
+		return &publish.DouyinPublishActionResponse{
+			StatusCode: constants.STATUS_INTERNAL_ERR,
+			StatusMsg:  &msg,
+		}, nil
 	}
+
 	// get file link
 	fileLink := storage.GetObjectLink(fileName)
 
 	// get file cover link
 	coverLink, err := storage.GetThumbnailLink(fileName)
 	if err != nil {
+		// TODO log error
+		msg := constants.GET_THUMBNAIL_LINK_FAILED
 		fmt.Println("get thumbnail link error == > ", err.Error())
-		return nil, err
+
+		return &publish.DouyinPublishActionResponse{
+			StatusCode: constants.STATUS_INTERNAL_ERR,
+			StatusMsg:  &msg,
+		}, nil
 	}
 
 	// set to a model
@@ -56,15 +72,22 @@ func (s *PublishServiceImpl) DouyinPublishAction(ctx context.Context, req *publi
 	}
 	fmt.Println("new publish model == > ", newPublishModel)
 
-	//repo.Q.New
 	err = repo.Q.WithContext(ctx).Publish.Create(&newPublishModel)
-	//err = q.Publish.WithContext(ctx).Create(&newPublishModel)
 	if err != nil {
+		// TODO log error
 		fmt.Println("create publish error == > ", err.Error())
-		return nil, err
+		msg := constants.DB_SAVE_FAILED
+
+		return &publish.DouyinPublishActionResponse{
+			StatusCode: constants.STATUS_INTERNAL_ERR,
+			StatusMsg:  &msg,
+		}, nil
 	}
 
-	return &publish.DouyinPublishActionResponse{}, nil
+	return &publish.DouyinPublishActionResponse{
+		StatusCode: constants.STATUS_SUCCESS,
+		StatusMsg:  nil,
+	}, nil
 }
 
 // PublishList implements the PublishServiceImpl interface.

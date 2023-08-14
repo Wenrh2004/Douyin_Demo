@@ -26,7 +26,7 @@ func init() {
 	}
 }
 
-func PublishAction(ctx *gin.Context) {
+func PublishActionController(ctx *gin.Context) {
 	// get parameter
 	var req publish.DouyinPublishActionRequest
 	err := ctx.Bind(&req)
@@ -39,19 +39,10 @@ func PublishAction(ctx *gin.Context) {
 		return
 	}
 
-	resp, err := publishServiceClient.DouyinPublishAction(ctx, &req)
-
-	if err != nil {
-		ctx.JSON(http.StatusOK, resp)
-		return
-	}
+	resp, _ := publishServiceClient.DouyinPublishAction(ctx, &req)
 
 	//	返回结果
-	ctx.JSON(http.StatusOK, gin.H{
-		"status_code": constants.STATUS_SUCCESS,
-		"status_msg":  "success",
-	})
-
+	ctx.JSON(http.StatusOK, resp)
 	return
 }
 
@@ -70,13 +61,7 @@ func PublishListController(ctx *gin.Context) {
 		return
 	}
 
-	resp, err := publishServiceClient.PublishList(ctx, &req)
-
-	if err != nil {
-		// TODO: Log error
-		ctx.JSON(http.StatusOK, resp)
-		return
-	}
+	resp, _ := publishServiceClient.PublishList(ctx, &req)
 
 	//	返回结果
 	ctx.JSON(http.StatusOK, resp)
