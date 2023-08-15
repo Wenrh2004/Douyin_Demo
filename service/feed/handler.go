@@ -69,3 +69,9 @@ func (s *FeedServiceImpl) GetVideoFeed(ctx context.Context, req *feed.FeedReques
 		StatusCode: constants.STATUS_SUCCESS,
 	}, nil
 }
+
+// GetVideo implements the FeedServiceImpl interface.
+func (s *FeedServiceImpl) GetVideo(ctx context.Context, req *feed.GetVideoRequest) (resp *feed.GetVideoResponse, err error) {
+	// TODO: Your code here...
+	return
+}

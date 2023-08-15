@@ -12,6 +12,7 @@ import (
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.
 type Client interface {
 	GetVideoFeed(ctx context.Context, Req *feed.FeedRequest, callOptions ...callopt.Option) (r *feed.FeedResponse, err error)
+	GetVideo(ctx context.Context, Req *feed.GetVideoRequest, callOptions ...callopt.Option) (r *feed.GetVideoResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -46,4 +47,9 @@ type kFeedServiceClient struct {
 func (p *kFeedServiceClient) GetVideoFeed(ctx context.Context, Req *feed.FeedRequest, callOptions ...callopt.Option) (r *feed.FeedResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.GetVideoFeed(ctx, Req)
+}
+
+func (p *kFeedServiceClient) GetVideo(ctx context.Context, Req *feed.GetVideoRequest, callOptions ...callopt.Option) (r *feed.GetVideoResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetVideo(ctx, Req)
 }
