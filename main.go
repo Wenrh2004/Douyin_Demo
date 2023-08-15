@@ -47,6 +47,9 @@ func main() {
 	feedService := route.Group("/feed")
 	feedService.GET("/", controller.FeedAction)
 
+	userService := route.Group("/user")
+	userService.GET("/", controller.GetUserProfileController)
+
 	//	启动服务
 	err := route.Run(":5500")
 	if err != nil {
