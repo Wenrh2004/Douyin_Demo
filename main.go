@@ -12,20 +12,8 @@ package main
 
 import (
 	"Douyin_Demo/controller"
-
 	"github.com/gin-gonic/gin"
 )
-
-func collectRoutes(route *gin.Engine) *gin.Engine {
-
-	// user
-	//	用户注册
-	route.POST("/register", controller.Register)
-	//	用户登陆
-	route.POST("/login", controller.Login)
-
-	return route
-}
 
 func main() {
 	//	获取初始化数据库
@@ -37,18 +25,21 @@ func main() {
 	if proxyErr != nil {
 		panic(proxyErr)
 	}
-	//	启动路由
-	collectRoutes(route)
 
-	publishService := route.Group("/publish")
+	douyin := route.Group("/douyin")
+
+	//	启动路由
+	publishService := douyin.Group("/publish")
 	publishService.POST("/action", controller.PublishActionController)
 	publishService.GET("/list", controller.PublishListController)
 
-	feedService := route.Group("/feed")
+	feedService := douyin.Group("/feed")
 	feedService.GET("/", controller.FeedAction)
 
-	userService := route.Group("/user")
-	userService.GET("/", controller.GetUserProfileController)
+	userService := douyin.Group("/user")
+	userService.GET("", controller.GetUserProfileController)
+	userService.POST("/register", controller.Register)
+	userService.POST("/login", controller.Login)
 
 	//	启动服务
 	err := route.Run(":5500")
