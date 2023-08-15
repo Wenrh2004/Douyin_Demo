@@ -31,10 +31,10 @@ func generateModelByGen() {
 	gormgen.UseDB(gormDB)
 
 	// generate basic DAO API for struct 'model.Publish'
-	gormgen.ApplyBasic(model.Publish{})
+	gormgen.ApplyBasic(model.Publish{}, model.UserProfile{})
 
 	// generate type-safe API for struct 'model.Publish'
-	gormgen.ApplyInterface(func(Querier) {}, model.Publish{})
+	gormgen.ApplyInterface(func(Querier) {}, model.Publish{}, model.UserProfile{})
 
 	gormgen.Execute()
 }
