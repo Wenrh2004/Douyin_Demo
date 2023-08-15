@@ -3,6 +3,7 @@ package main
 import (
 	"Douyin_Demo/constants"
 	feed "Douyin_Demo/kitex_gen/douyin/feed"
+	"Douyin_Demo/kitex_gen/douyin/user"
 	"Douyin_Demo/repo"
 	"context"
 	"time"
@@ -41,7 +42,7 @@ func (s *FeedServiceImpl) GetVideoFeed(ctx context.Context, req *feed.FeedReques
 	var videoList []*feed.Video
 	for _, item := range feedList {
 		// TODO: get user info from repo
-		fakeUser := &feed.User{
+		fakeUser := &user.User{
 			Id:   int64(item.UserId),
 			Name: "fake user",
 		}
@@ -72,6 +73,48 @@ func (s *FeedServiceImpl) GetVideoFeed(ctx context.Context, req *feed.FeedReques
 
 // GetVideo implements the FeedServiceImpl interface.
 func (s *FeedServiceImpl) GetVideo(ctx context.Context, req *feed.GetVideoRequest) (resp *feed.GetVideoResponse, err error) {
-	// TODO: Your code here...
-	return
+	// get param from req
+	videoId := req.VideoId
+	var queryToekn string
+
+	if req.Token != nil {
+		queryToekn = *req.Token
+	} else {
+		queryToekn = ""
+	}
+
+	// get video from db
+	publish := repo.Q.Publish
+	publishModel, err := publish.WithContext(ctx).Where(publish.VideoId.Eq(videoId)).First()
+	if err != nil {
+		msg := constants.DB_QUERY_FAILED
+		return &feed.GetVideoResponse{
+			StatusCode: constants.STATUS_UNABLE_QUERY,
+			StatusMsg:  &msg,
+		}, nil
+	}
+
+	userResp, err := getUserById(publishModel.UserId, queryToekn)
+
+	if err != nil {
+		msg := constants.INTERNAL_SERVER_ERROR
+		return &feed.GetVideoResponse{
+			StatusCode: constants.STATUS_INTERNAL_ERR,
+			StatusMsg:  &msg,
+		}, nil
+	}
+
+	// create response
+	return &feed.GetVideoResponse{
+		StatusCode: constants.STATUS_SUCCESS,
+		StatusMsg:  nil,
+		Video: &feed.Video{
+			Id:       publishModel.VideoId,
+			PlayUrl:  publishModel.PlayUrl,
+			CoverUrl: publishModel.CoverUrl,
+			Title:    publishModel.Title,
+			Author:   userResp,
+		},
+	}, nil
+
 }
