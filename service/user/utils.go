@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 )
 
 // TODO integrate with user register
 
 func GenerateUserProfile(userId int64) (profile *model.UserProfile, err error) {
-	avatar := GenerateAvatar(string(userId))
+	strId := strconv.FormatInt(userId, 7)
+	avatar := GenerateAvatar(strId)
 	signature, err := GenerateSignature()
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -34,7 +36,8 @@ func GenerateUserProfile(userId int64) (profile *model.UserProfile, err error) {
 
 // TODO remove db code outside of handler
 func saveUserProfile(userId int64, avatar string, signature string, background string) (userPro *model.UserProfile, err error) {
-	name := "User " + string(userId)
+	strId := strconv.FormatInt(userId, 7)
+	name := "User " + strId
 	userPro = &model.UserProfile{
 		UserId:          userId,
 		Name:            name,
