@@ -2,7 +2,6 @@ package main
 
 import (
 	"Douyin_Demo/constants"
-	"Douyin_Demo/kitex_gen/douyin/feed"
 	publish "Douyin_Demo/kitex_gen/douyin/publish"
 	"Douyin_Demo/model"
 	"Douyin_Demo/repo"
@@ -93,7 +92,12 @@ func (s *PublishServiceImpl) DouyinPublishAction(ctx context.Context, req *publi
 // PublishList implements the PublishServiceImpl interface.
 func (s *PublishServiceImpl) PublishList(ctx context.Context, req *publish.PublishListRequest) (resp *publish.PublishListResponse, err error) {
 	// TODO: get requestingUserId from token
-
+	var token string
+	if req.Token != "" {
+		token = req.Token
+	} else {
+		token = "mock_token"
+	}
 	// get user id from req
 	userId := req.UserId
 	publishQ := repo.Q.Publish
@@ -110,17 +114,16 @@ func (s *PublishServiceImpl) PublishList(ctx context.Context, req *publish.Publi
 		}, nil
 	}
 
-	// set to video list
-	var videoList []*feed.Video
-	for _, item := range publishList {
-		// TODO: get author info by user service
+	// get author info by user service
+	videoList, err := getVideos(publishList, token)
 
-		videoList = append(videoList, &feed.Video{
-			Id:       int64(item.ID),
-			PlayUrl:  item.PlayUrl,
-			CoverUrl: item.CoverUrl,
-			Title:    item.Title,
-		})
+	if err != nil {
+		fmt.Println("get videos error == > ", err.Error())
+		statusMsg := err.Error()
+		return &publish.PublishListResponse{
+			StatusCode: constants.STATUS_INTERNAL_ERR,
+			StatusMsg:  &statusMsg,
+		}, nil
 	}
 
 	return &publish.PublishListResponse{
