@@ -98,7 +98,7 @@ func (s *FeedServiceImpl) GetVideo(ctx context.Context, req *feed.GetVideoReques
 
 	// get video from db
 	publish := repo.Q.Publish
-	publishModel, err := publish.WithContext(ctx).Where(publish.VideoId.Eq(videoId)).First()
+	publishModel, err := publish.WithContext(ctx).Where(publish.ID.Eq(uint(videoId))).First()
 	if err != nil {
 		msg := constants.DB_QUERY_FAILED
 		return &feed.GetVideoResponse{
@@ -127,6 +127,12 @@ func (s *FeedServiceImpl) GetVideo(ctx context.Context, req *feed.GetVideoReques
 			CoverUrl: publishModel.CoverUrl,
 			Title:    publishModel.Title,
 			Author:   userResp,
+			// TODO: implement like count
+			FavoriteCount: 0,
+			// TODO: implement comment count
+			CommentCount: 0,
+			// TODO: implement favorite
+			IsFavorite: false,
 		},
 	}, nil
 

@@ -12,7 +12,7 @@ import (
 
 func TestPublishServiceImpl_DouyinPublishAction(t *testing.T) {
 	// get video file in curent directory
-	testFile, err := os.ReadFile("./resource/test.mp4")
+	testFile, err := os.ReadFile("./resource/test1.mp4")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +24,7 @@ func TestPublishServiceImpl_DouyinPublishAction(t *testing.T) {
 	}{
 		ctx: context.Background(),
 		req: &publish.DouyinPublishActionRequest{
-			Title: "TestVideo",
+			Title: "TestVideo1 from 123456",
 			Data:  testFile,
 			Token: "123456",
 		}}
@@ -123,7 +123,7 @@ func TestPublishServiceImpl_PublishList(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &PublishServiceImpl{}
 			got, err := s.PublishList(tt.args.ctx, tt.args.req)
-			if len(got.VideoList) != 3 {
+			if len(got.VideoList) != 2 {
 				t.Errorf("PublishServiceImpl.PublishList() = %v, want %v", got, tt.want)
 			}
 			if (err != nil) != tt.wantErr {
