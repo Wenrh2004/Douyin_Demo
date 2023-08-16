@@ -19,11 +19,14 @@ import (
 func collectRoutes(route *gin.Engine) *gin.Engine {
 
 	// user
-	//	用户注册
+	// User registration.
 	route.POST("/register", controller.Register)
-	//	用户登陆
+	// User login.
 	route.POST("/login", controller.Login)
 
+	// message
+	// Get chat logs.
+	route.GET("/message/chat", controller.GetMessage)
 	return route
 }
 
