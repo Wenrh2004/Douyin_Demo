@@ -47,6 +47,7 @@ const (
 // AppConfig == > global variable
 var AppConfig = AppConfigSchema{}
 
+// init ==> reads a configuration file, unmarshals the configuration data, and sets the AppConfig.DSN variable to a connection string that specifies the database connection parameters
 func init() {
 	readConfig()
 	unmarshallConfig()
@@ -104,7 +105,7 @@ func unmarshallConfig() {
 		panic("config file Unmarshal error+" + err.Error())
 	}
 
-	//fmt.Println("AppConfig", AppConfig)
+	// fmt.Println("AppConfig", AppConfig)
 }
 
 // setDefaultConfig == > set default configuration properties

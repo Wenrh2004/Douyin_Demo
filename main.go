@@ -15,6 +15,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+
+func collectRoutes(route *gin.Engine) *gin.Engine {
+
+	// user
+	// User registration.
+	route.POST("/register", controller.Register)
+	// User login.
+	route.POST("/login", controller.Login)
+
+	// message
+	// Get chat logs.
+	route.GET("/message/chat", controller.GetMessage)
+	return route
+}
+
 func main() {
 	//	获取初始化数据库
 	// common.InitDB()
@@ -40,6 +55,9 @@ func main() {
 	userService.GET("", controller.GetUserProfileController)
 	userService.POST("/register", controller.Register)
 	userService.POST("/login", controller.Login)
+  
+  messageService := douyin.Group("/meesage")
+  messageService.GET("/chat", controller.GetMessage)
 
 	//	启动服务
 	err := route.Run(":5500")
