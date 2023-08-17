@@ -38,6 +38,7 @@ func getMongoDBConfig() *MongoDB {
 func InitMongoDB() {
 	var config = getMongoDBConfig()
 	dsn := fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority", config.userName, config.passWord, config.databaseURL)
+
 	// Use the SetServerAPIOptions() method to set the Stable API version to 1
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI(dsn).SetServerAPIOptions(serverAPI)

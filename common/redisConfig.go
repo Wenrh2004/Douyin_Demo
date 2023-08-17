@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var redisClient *redis.Client
+var RedisClient *redis.Client
 
 // Redis ==> redis configuration
 type Redis struct {
@@ -45,6 +45,6 @@ func InitRedis() *redis.Client {
 	}
 
 	rdb := redis.NewClient(opt)
-	redisClient = rdb
+	RedisClient = rdb
 	return rdb
 }
