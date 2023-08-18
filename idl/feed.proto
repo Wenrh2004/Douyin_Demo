@@ -2,6 +2,8 @@ syntax = "proto3";
 package douyin.feed;
 option go_package = "douyin/feed";
 
+import "user.proto";
+
 message FeedRequest {
   optional int64 latest_time = 1; // 可选参数，限制返回视频的最新投稿时间戳，精确到秒，不填表示当前时间
   optional string token = 2; // 可选参数，登录用户设置
@@ -14,9 +16,20 @@ message FeedResponse {
   optional int64 next_time = 4; // 本次返回的视频中，发布最早的时间，作为下次请求时的latest_time
 }
 
+message GetVideoRequest {
+  int64 video_id = 1; // 视频唯一标识
+  optional string token = 2; // 可选参数，登录用户设置
+}
+
+message GetVideoResponse {
+  int32 status_code = 1; // 状态码，0-成功，其他值-失败
+  optional string status_msg = 2; // 返回状态描述
+  optional Video video = 3; // 视频
+}
+
 message Video {
    int64 id = 1; // 视频唯一标识
-   User author = 2; // 视频作者信息
+   douyin.user.User author = 2; // 视频作者信息
    string play_url = 3; // 视频播放地址
    string cover_url = 4; // 视频封面地址
    int64 favorite_count = 5; // 视频的点赞总数
@@ -25,22 +38,10 @@ message Video {
    string title = 8; // 视频标题
 }
 
-message User {
-   int64 id = 1; // 用户id
-   string name = 2; // 用户名称
-  optional int64 follow_count = 3; // 关注总数
-  optional int64 follower_count = 4; // 粉丝总数
-   bool is_follow = 5; // true-已关注，false-未关注
-  optional string avatar = 6; //用户头像
-  optional string background_image = 7; //用户个人页顶部大图
-  optional string signature = 8; //个人简介
-  optional int64 total_favorited = 9; //获赞数量
-  optional int64 work_count = 10; //作品数量
-  optional int64 favorite_count = 11; //点赞数量
-}
-
 // 视频流服务
 service FeedService {
   // 不限制登录状态，返回按投稿时间倒序的视频列表
   rpc GetVideoFeed(FeedRequest) returns (FeedResponse) {}
+  // 不限制登陆状态，返回视频
+  rpc GetVideo(GetVideoRequest) returns (GetVideoResponse) {}
 }

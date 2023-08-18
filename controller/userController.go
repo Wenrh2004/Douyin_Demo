@@ -200,8 +200,9 @@ func Login(ctx *gin.Context) {
 
 // GetUserProfileController get user profile
 func GetUserProfileController(ctx *gin.Context) {
-	var req user.UserInfoRequest
-	err := ctx.Bind(&req)
+	var param UserProfileParam
+	err := ctx.Bind(&param)
+
 	if err != nil {
 		ctx.JSON(200, gin.H{
 			"status_code": constants.STATUS_FAILED,
@@ -210,7 +211,19 @@ func GetUserProfileController(ctx *gin.Context) {
 		return
 	}
 
-	resp, _ := userServiceClient.GetUserInfo(ctx, &req)
+	// TODO Validate token
+	if param.UserId == 0 {
+		ctx.JSON(200, gin.H{
+			"status_code": constants.PARAMS_ERROR_CODE,
+			"status_msg":  "user id is required",
+		})
+		return
+	}
+
+	resp, _ := userServiceClient.GetUserInfo(ctx, &user.UserInfoRequest{
+		UserId: param.UserId,
+		Token:  param.Token,
+	})
 
 	ctx.JSON(200, resp)
 	return
