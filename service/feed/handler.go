@@ -21,12 +21,23 @@ func (s *FeedServiceImpl) GetVideoFeed(ctx context.Context, req *feed.FeedReques
 		latestTime = time.Now().UnixMilli()
 	}
 
+	var token string
+	if req.Token != nil {
+		token = *req.Token
+	} else {
+		token = ""
+	}
+
 	publish := repo.Q.Publish
 
 	// get feed list from repo with created_at < latestTime
-	feedList, err := publish.Where(publish.CreatedAt.Lte(time.UnixMilli(latestTime))).Order(publish.CreatedAt.Desc()).Limit(20).Find()
+	feedList, err := publish.WithContext(ctx).Where(publish.CreatedAt.Lte(time.UnixMilli(latestTime))).Order(publish.CreatedAt.Desc()).Limit(20).Find()
 	if err != nil {
-		return nil, err
+		msg := constants.DB_QUERY_FAILED
+		return &feed.FeedResponse{
+			StatusCode: constants.STATUS_UNABLE_QUERY,
+			StatusMsg:  &msg,
+		}, nil
 	}
 
 	// nextTime is the last time of the feed list
@@ -40,10 +51,14 @@ func (s *FeedServiceImpl) GetVideoFeed(ctx context.Context, req *feed.FeedReques
 	// create video list from feed list
 	var videoList []*feed.Video
 	for _, item := range feedList {
-		// TODO: get user info from repo
-		fakeUser := &feed.User{
-			Id:   int64(item.UserId),
-			Name: "fake user",
+		author, err2 := getUserById(item.UserId, token)
+
+		if err2 != nil {
+			msg := constants.INTERNAL_SERVER_ERROR
+			return &feed.FeedResponse{
+				StatusCode: constants.STATUS_INTERNAL_ERR,
+				StatusMsg:  &msg,
+			}, nil
 		}
 
 		videoList = append(videoList, &feed.Video{
@@ -51,14 +66,13 @@ func (s *FeedServiceImpl) GetVideoFeed(ctx context.Context, req *feed.FeedReques
 			PlayUrl:  item.PlayUrl,
 			CoverUrl: item.CoverUrl,
 			Title:    item.Title,
-			// TODO: get user info from repo
-			Author: fakeUser,
+			Author:   author,
 			// TODO: implement like count
 			FavoriteCount: 0,
 			// TODO: implement comment count
 			CommentCount: 0,
 			// TODO: implement favorite
-			IsFavorite: true,
+			IsFavorite: false,
 		})
 	}
 
@@ -68,4 +82,58 @@ func (s *FeedServiceImpl) GetVideoFeed(ctx context.Context, req *feed.FeedReques
 		NextTime:   &nextTime,
 		StatusCode: constants.STATUS_SUCCESS,
 	}, nil
+}
+
+// GetVideo implements the FeedServiceImpl interface.
+func (s *FeedServiceImpl) GetVideo(ctx context.Context, req *feed.GetVideoRequest) (resp *feed.GetVideoResponse, err error) {
+	// get param from req
+	videoId := req.VideoId
+	var queryToekn string
+
+	if req.Token != nil {
+		queryToekn = *req.Token
+	} else {
+		queryToekn = ""
+	}
+
+	// get video from db
+	publish := repo.Q.Publish
+	publishModel, err := publish.WithContext(ctx).Where(publish.ID.Eq(uint(videoId))).First()
+	if err != nil {
+		msg := constants.DB_QUERY_FAILED
+		return &feed.GetVideoResponse{
+			StatusCode: constants.STATUS_UNABLE_QUERY,
+			StatusMsg:  &msg,
+		}, nil
+	}
+
+	userResp, err := getUserById(publishModel.UserId, queryToekn)
+
+	if err != nil {
+		msg := constants.INTERNAL_SERVER_ERROR
+		return &feed.GetVideoResponse{
+			StatusCode: constants.STATUS_INTERNAL_ERR,
+			StatusMsg:  &msg,
+		}, nil
+	}
+
+	// create response
+	return &feed.GetVideoResponse{
+		StatusCode: constants.STATUS_SUCCESS,
+		StatusMsg:  nil,
+		Video: &feed.Video{
+			Id:       publishModel.VideoId,
+			PlayUrl:  publishModel.PlayUrl,
+			CoverUrl: publishModel.CoverUrl,
+			Title:    publishModel.Title,
+			Author:   userResp,
+			// TODO: implement like count
+			FavoriteCount: 0,
+			// TODO: implement comment count
+			CommentCount: 0,
+			// TODO: implement favorite
+			IsFavorite: false,
+		},
+	}, nil
+
 }

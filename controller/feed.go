@@ -27,8 +27,10 @@ func init() {
 
 func FeedAction(ctx *gin.Context) {
 	//	获取参数
-	var req feed.FeedRequest
-	err := ctx.Bind(&req)
+	var param FeedParam
+	err := ctx.Bind(&param)
+	//log.Printf("Request: %+v", param)
+
 	if err != nil {
 		ctx.JSON(200, gin.H{
 			"status_code": constants.STATUS_FAILED,
@@ -37,8 +39,13 @@ func FeedAction(ctx *gin.Context) {
 		return
 	}
 
+	// TODO Validate token
+
 	//	调用服务
-	resp, err := feedServiceClient.GetVideoFeed(ctx, &req)
+	resp, err := feedServiceClient.GetVideoFeed(ctx, &feed.FeedRequest{
+		LatestTime: &param.LatestTime,
+		Token:      &param.Token,
+	})
 	if err != nil {
 		ctx.JSON(200, gin.H{
 			"status_code": constants.STATUS_FAILED,

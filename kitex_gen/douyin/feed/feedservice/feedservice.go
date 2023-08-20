@@ -23,6 +23,7 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	handlerType := (*feed.FeedService)(nil)
 	methods := map[string]kitex.MethodInfo{
 		"GetVideoFeed": kitex.NewMethodInfo(getVideoFeedHandler, newGetVideoFeedArgs, newGetVideoFeedResult, false),
+		"GetVideo":     kitex.NewMethodInfo(getVideoHandler, newGetVideoArgs, newGetVideoResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName": "douyin.feed",
@@ -191,6 +192,159 @@ func (p *GetVideoFeedResult) GetResult() interface{} {
 	return p.Success
 }
 
+func getVideoHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(feed.GetVideoRequest)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(feed.FeedService).GetVideo(ctx, req)
+		if err != nil {
+			return err
+		}
+		if err := st.SendMsg(resp); err != nil {
+			return err
+		}
+	case *GetVideoArgs:
+		success, err := handler.(feed.FeedService).GetVideo(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*GetVideoResult)
+		realResult.Success = success
+	}
+	return nil
+}
+func newGetVideoArgs() interface{} {
+	return &GetVideoArgs{}
+}
+
+func newGetVideoResult() interface{} {
+	return &GetVideoResult{}
+}
+
+type GetVideoArgs struct {
+	Req *feed.GetVideoRequest
+}
+
+func (p *GetVideoArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(feed.GetVideoRequest)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *GetVideoArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *GetVideoArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *GetVideoArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, fmt.Errorf("No req in GetVideoArgs")
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *GetVideoArgs) Unmarshal(in []byte) error {
+	msg := new(feed.GetVideoRequest)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var GetVideoArgs_Req_DEFAULT *feed.GetVideoRequest
+
+func (p *GetVideoArgs) GetReq() *feed.GetVideoRequest {
+	if !p.IsSetReq() {
+		return GetVideoArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *GetVideoArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *GetVideoArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type GetVideoResult struct {
+	Success *feed.GetVideoResponse
+}
+
+var GetVideoResult_Success_DEFAULT *feed.GetVideoResponse
+
+func (p *GetVideoResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(feed.GetVideoResponse)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *GetVideoResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *GetVideoResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *GetVideoResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, fmt.Errorf("No req in GetVideoResult")
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *GetVideoResult) Unmarshal(in []byte) error {
+	msg := new(feed.GetVideoResponse)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *GetVideoResult) GetSuccess() *feed.GetVideoResponse {
+	if !p.IsSetSuccess() {
+		return GetVideoResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *GetVideoResult) SetSuccess(x interface{}) {
+	p.Success = x.(*feed.GetVideoResponse)
+}
+
+func (p *GetVideoResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *GetVideoResult) GetResult() interface{} {
+	return p.Success
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -206,6 +360,16 @@ func (p *kClient) GetVideoFeed(ctx context.Context, Req *feed.FeedRequest) (r *f
 	_args.Req = Req
 	var _result GetVideoFeedResult
 	if err = p.c.Call(ctx, "GetVideoFeed", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetVideo(ctx context.Context, Req *feed.GetVideoRequest) (r *feed.GetVideoResponse, err error) {
+	var _args GetVideoArgs
+	_args.Req = Req
+	var _result GetVideoResult
+	if err = p.c.Call(ctx, "GetVideo", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

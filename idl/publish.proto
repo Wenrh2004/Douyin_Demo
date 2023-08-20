@@ -1,5 +1,5 @@
 syntax = "proto3";
-package douyin.publish.action;
+package douyin.publish;
 option go_package = "douyin/publish";
 
 import "feed.proto";

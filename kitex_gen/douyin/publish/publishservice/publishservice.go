@@ -26,7 +26,7 @@ func NewServiceInfo() *kitex.ServiceInfo {
 		"PublishList":         kitex.NewMethodInfo(publishListHandler, newPublishListArgs, newPublishListResult, false),
 	}
 	extra := map[string]interface{}{
-		"PackageName": "douyin.publish.action",
+		"PackageName": "douyin.publish",
 	}
 	svcInfo := &kitex.ServiceInfo{
 		ServiceName:     serviceName,

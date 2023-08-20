@@ -12,9 +12,9 @@ package main
 
 import (
 	"Douyin_Demo/controller"
-
 	"github.com/gin-gonic/gin"
 )
+
 
 func collectRoutes(route *gin.Engine) *gin.Engine {
 
@@ -40,15 +40,24 @@ func main() {
 	if proxyErr != nil {
 		panic(proxyErr)
 	}
-	//	启动路由
-	collectRoutes(route)
 
-	publishService := route.Group("/publish")
+	douyin := route.Group("/douyin")
+
+	//	启动路由
+	publishService := douyin.Group("/publish")
 	publishService.POST("/action", controller.PublishActionController)
 	publishService.GET("/list", controller.PublishListController)
 
-	feedService := route.Group("/feed")
+	feedService := douyin.Group("/feed")
 	feedService.GET("/", controller.FeedAction)
+
+	userService := douyin.Group("/user")
+	userService.GET("", controller.GetUserProfileController)
+	userService.POST("/register", controller.Register)
+	userService.POST("/login", controller.Login)
+  
+  messageService := douyin.Group("/meesage")
+  messageService.GET("/chat", controller.GetMessage)
 
 	//	启动服务
 	err := route.Run(":5500")

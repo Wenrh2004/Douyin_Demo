@@ -11,7 +11,9 @@ var DB *gorm.DB
 func init() {
 	dsn := config.AppConfig.DSN
 	var err error
-	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+		SkipDefaultTransaction: true,
+	})
 	if err != nil {
 		panic("mysql - database connect error  == > " + err.Error())
 	}

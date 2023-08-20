@@ -47,13 +47,12 @@ func PublishActionController(ctx *gin.Context) {
 }
 
 func PublishListController(ctx *gin.Context) {
+	// TODO update data binding
 	// get parameter
-	var req publish.PublishListRequest
-	err := ctx.Bind(&req)
+	var listParam PublishListParam
+	err := ctx.ShouldBind(&listParam)
 
 	if err != nil {
-		// TODO: Log error
-
 		ctx.JSON(http.StatusOK, gin.H{
 			"status_code": constants.PARAMS_ERROR_CODE,
 			"status_msg":  err.Error(),
@@ -61,7 +60,20 @@ func PublishListController(ctx *gin.Context) {
 		return
 	}
 
-	resp, _ := publishServiceClient.PublishList(ctx, &req)
+	// params validation
+	// TODO: validate token
+	if listParam.UserId == 0 {
+		ctx.JSON(200, gin.H{
+			"status_code": constants.PARAMS_ERROR_CODE,
+			"status_msg":  "user id is required",
+		})
+		return
+	}
+
+	resp, _ := publishServiceClient.PublishList(ctx, &publish.PublishListRequest{
+		UserId: listParam.UserId,
+		Token:  listParam.Token,
+	})
 
 	//	返回结果
 	ctx.JSON(http.StatusOK, resp)

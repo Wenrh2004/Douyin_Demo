@@ -39,6 +39,9 @@ const (
 
 	PublishServiceName = "publish-service"
 	PublishServicePort = ":9011"
+
+	UserServiceName = "user-service"
+	UserServicePort = ":9012"
 )
 
 // AppConfig == > global variable

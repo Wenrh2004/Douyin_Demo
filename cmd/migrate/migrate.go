@@ -29,4 +29,10 @@ func main() {
 		panic("publish model has changed == > transfer to new model struct" + err.Error())
 	}
 
+	// migrate userprofile model
+	err = db.AutoMigrate(&model.UserProfile{})
+	if err != nil {
+		panic("userprofile model has changed == > transfer to new model struct" + err.Error())
+	}
+
 }
