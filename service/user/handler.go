@@ -72,3 +72,15 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.UserInfoReq
 		User:       &resUser,
 	}, nil
 }
+
+// UserRegister implements the UserServiceImpl interface.
+func (s *UserServiceImpl) UserRegister(ctx context.Context, req *user.UserRegisterRequest) (resp *user.UserRegisterResponse, err error) {
+	// TODO: Your code here...
+	return
+}
+
+// UserLogin implements the UserServiceImpl interface.
+func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequest) (resp *user.UserLoginResponse, err error) {
+	// TODO: Your code here...
+	return
+}
