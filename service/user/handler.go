@@ -118,7 +118,28 @@ func (s *UserServiceImpl) UserRegister(ctx context.Context, req *user.UserRegist
 		Password: string(hashedPassword),
 	}
 
-	err = userQ.WithContext(ctx).Save(registerUser)
+	err = repo.Q.Transaction(func(tx *repo.Query) error {
+		// create user
+		err = tx.User.Create(registerUser)
+		if err != nil {
+			return err
+		}
+
+		// create user profile
+		profile, err := GetNewProfile(int64(registerUser.ID))
+		if err != nil {
+			return err
+		}
+
+		// save profile
+		err = tx.UserProfile.Create(profile)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
 	if err != nil {
 		msg := constants.DB_SAVE_FAILED
 		return &user.UserRegisterResponse{
@@ -127,20 +148,11 @@ func (s *UserServiceImpl) UserRegister(ctx context.Context, req *user.UserRegist
 		}, nil
 	}
 
-	register, err := userQ.WithContext(ctx).Where(userQ.Username.Eq(registerName)).First()
-	if err != nil {
-		msg := constants.DB_QUERY_FAILED
-		return &user.UserRegisterResponse{
-			StatusCode: constants.STATUS_UNABLE_QUERY,
-			StatusMsg:  &msg,
-		}, nil
-	}
-
 	return &user.UserRegisterResponse{
-		UserId:     int64(register.ID),
+		UserId:     int64(registerUser.ID),
 		StatusCode: constants.STATUS_SUCCESS,
 		StatusMsg:  nil,
-		// get token
+		// TODO get token
 		Token: "1234",
 	}, nil
 }

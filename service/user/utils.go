@@ -9,8 +9,30 @@ import (
 	"strconv"
 )
 
-// TODO integrate with user register
+func GetNewProfile(userId int64) (profile *model.UserProfile, err error) {
+	strId := strconv.FormatInt(userId, 7)
+	avatar := GenerateAvatar(strId)
+	signature, err := GenerateSignature()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	background, err := GenerateBackground()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil, err
+	}
 
+	return &model.UserProfile{
+		UserId:          userId,
+		Name:            "User " + strId,
+		Avatar:          avatar,
+		Signature:       signature,
+		BackgroundImage: background,
+	}, nil
+}
+
+// only for test
 func GenerateUserProfile(userId int64) (profile *model.UserProfile, err error) {
 	strId := strconv.FormatInt(userId, 7)
 	avatar := GenerateAvatar(strId)
