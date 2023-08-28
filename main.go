@@ -15,7 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
 func collectRoutes(route *gin.Engine) *gin.Engine {
 
 	// user
@@ -55,9 +54,9 @@ func main() {
 	userService.GET("", controller.GetUserProfileController)
 	userService.POST("/register", controller.Register)
 	userService.POST("/login", controller.Login)
-  
-  messageService := douyin.Group("/meesage")
-  messageService.GET("/chat", controller.GetMessage)
+
+	messageService := douyin.Group("/meesage")
+	messageService.GET("/chat", controller.GetMessage)
 
 	//	启动服务
 	err := route.Run(":5500")

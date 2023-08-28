@@ -46,6 +46,7 @@ const (
 	STATUS_UNABLE_QUERY = 300
 	STATUS_INTERNAL_ERR = 301
 	PARAMS_ERROR_CODE   = 302
+	STATUS_UNABLE_SAVE  = 303
 )
 
 // status msg
@@ -57,4 +58,9 @@ var (
 	INVALID_CONTENT_TYPE      = "Invalid Content Type, only support mp4"
 	UPLOAD_FAILED             = "uploadFailed, please try again later"
 	GET_THUMBNAIL_LINK_FAILED = "create cover failed, please try again later"
+	// user
+	EXIST_USERNAME         = "Username already exist"
+	INVALID_REGISTER_EMAIL = "username should be a valid email"
+	INVALID_REGISTER_PWD   = "password should be 6-18 characters"
+	INVALID_LOGIN          = "Invalid username or password, please try again"
 )

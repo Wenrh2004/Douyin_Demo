@@ -43,95 +43,57 @@ func init() {
 
 // Register method for user registry
 func Register(ctx *gin.Context) {
-	db := common.GetDB()
-
 	//	observe web request
-	var requestUser model.User
-	err := ctx.Bind(&requestUser)
+	var registerParam UserRegisterParam
+	err := ctx.Bind(&registerParam)
 	if err != nil {
-		panic("Parameter bind failed" + err.Error())
-	}
-	userName := requestUser.Username
-	password := requestUser.Password
-	// todo 数据解密
-
-	//	data check
-
-	//	check username
-	if len(userName) == 0 {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-			"code":        422,
-			"message":     "用户名不能为空",
-			"description": constants.PARAMS_ERROR,
+		ctx.JSON(200, gin.H{
+			"status_code": constants.STATUS_FAILED,
+			"status_msg":  err.Error(),
 		})
-		var rgx = "^[a-zA-Z\\u4e00-\\u9fa5]{1,8}\\$" // 1-8 中文英文但是不包含下划线等符号
-		matchedRes, _ := regexp.MatchString(rgx, userName)
-
-		if !matchedRes {
-			ctx.JSON(http.StatusUnavailableForLegalReasons, gin.H{
-				"code":        422,
-				"message":     "用户名不符合规范,",
-				"description": constants.PARAMS_ERROR,
-			})
-		}
+		return
 	}
+	userName := registerParam.Username
+	password := registerParam.Password
+	log.Printf(userName)
+	log.Printf(password)
+	//	data check
+	//	null param check
+	if len(userName) == 0 || len(password) == 0 {
+		msg := constants.PARAMS_ERROR
+		ctx.JSON(http.StatusOK, gin.H{
+			"status_code": constants.PARAMS_ERROR_CODE,
+			"status_msg":  &msg,
+		})
+		return
+	}
+
 	//	password check
 	if len(password) < 6 || len(password) > 18 {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-			"code":        422,
-			"message":     "密码长度在6位-18位之间,且必须使用字母数字和特殊符号",
-			"description": constants.MISMATCH,
+		msg := constants.INVALID_REGISTER_PWD
+		ctx.JSON(http.StatusOK, gin.H{
+			"status_code": constants.PARAMS_ERROR_CODE,
+			"status_msg":  &msg,
 		})
-		var rgx = "^[a-zA-Z0-9~!@#\\$%^&*()_+}{\":?><,.';\\]\\[\\\\\\/\\-]{6,18}\\$" // 6 - 18 英语字母数字特殊符号组成
-
-		matchedRes, _ := regexp.MatchString(rgx, userName)
-		if !matchedRes {
-			ctx.JSON(http.StatusUnavailableForLegalReasons, gin.H{
-				"code":        422,
-				"message":     "密码不符合规范,",
-				"description": constants.PARAMS_ERROR,
-			})
-		}
-	}
-	// promise only one in db
-	var user model.User
-	db.Where("userName = ?", userName).First(&user)
-	if user.ID != 0 {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-			"code":        422,
-			"message":     "用户已被注册",
-			"description": constants.USER_PROFILE_ALREAD_UESD,
-		})
+		return
 	}
 
-	//	save user into database
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"code":        500,
-			"message":     "用户信息异常",
-			"description": constants.DB_MISMATCH,
+	if !ValidateEmail(userName) {
+		msg := constants.INVALID_REGISTER_EMAIL
+		ctx.JSON(http.StatusOK, gin.H{
+			"status_code": constants.PARAMS_ERROR_CODE,
+			"status_msg":  &msg,
 		})
+		return
 	}
-	newUser := model.User{
+
+	resp, _ := userServiceClient.UserRegister(ctx, &user.UserRegisterRequest{
 		Username: userName,
-		Password: string(hashedPassword),
-	}
-	tx := db.Create(&newUser)
-
-	if tx != nil {
-		ctx.JSON(http.StatusExpectationFailed, gin.H{
-			"code":        500,
-			"message":     "新增用户信息失败",
-			"description": constants.DB_SAVE_FAILED,
-		})
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"code":        200,
-		"message":     "用户信息录入成功",
-		"description": constants.SUCCESS,
+		Password: password,
 	})
+
+	ctx.JSON(200, resp)
+	return
 }
 
 // Login user login
@@ -227,4 +189,10 @@ func GetUserProfileController(ctx *gin.Context) {
 
 	ctx.JSON(200, resp)
 	return
+}
+
+func ValidateEmail(username string) bool {
+	pattern := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	re := regexp.MustCompile(pattern)
+	return re.MatchString(username)
 }

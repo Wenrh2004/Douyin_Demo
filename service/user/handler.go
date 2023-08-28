@@ -3,9 +3,11 @@ package main
 import (
 	"Douyin_Demo/constants"
 	user "Douyin_Demo/kitex_gen/douyin/user"
+	"Douyin_Demo/model"
 	"Douyin_Demo/repo"
 	"context"
 	"errors"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -75,8 +77,72 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.UserInfoReq
 
 // UserRegister implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UserRegister(ctx context.Context, req *user.UserRegisterRequest) (resp *user.UserRegisterResponse, err error) {
-	// TODO: Your code here...
-	return
+
+	// get params
+	registerName := req.Username
+	registerPassword := req.Password
+
+	userQ := repo.Q.User
+
+	// check if username exist
+	exist, err := userQ.WithContext(ctx).Where(userQ.Username.Eq(registerName)).First()
+	if exist != nil {
+		msg := constants.EXIST_USERNAME
+		return &user.UserRegisterResponse{
+			StatusCode: constants.STATUS_FAILED,
+			StatusMsg:  &msg,
+		}, nil
+	}
+
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		msg := constants.DB_QUERY_FAILED
+		return &user.UserRegisterResponse{
+			StatusCode: constants.STATUS_UNABLE_QUERY,
+			StatusMsg:  &msg,
+		}, nil
+	}
+
+	// hashed password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerPassword), bcrypt.DefaultCost)
+	if err != nil {
+		msg := constants.INTERNAL_SERVER_ERROR
+
+		return &user.UserRegisterResponse{
+			StatusCode: constants.STATUS_INTERNAL_ERR,
+			StatusMsg:  &msg,
+		}, nil
+	}
+
+	registerUser := &model.User{
+		Username: registerName,
+		Password: string(hashedPassword),
+	}
+
+	err = userQ.WithContext(ctx).Save(registerUser)
+	if err != nil {
+		msg := constants.DB_SAVE_FAILED
+		return &user.UserRegisterResponse{
+			StatusCode: constants.STATUS_UNABLE_SAVE,
+			StatusMsg:  &msg,
+		}, nil
+	}
+
+	register, err := userQ.WithContext(ctx).Where(userQ.Username.Eq(registerName)).First()
+	if err != nil {
+		msg := constants.DB_QUERY_FAILED
+		return &user.UserRegisterResponse{
+			StatusCode: constants.STATUS_UNABLE_QUERY,
+			StatusMsg:  &msg,
+		}, nil
+	}
+
+	return &user.UserRegisterResponse{
+		UserId:     int64(register.ID),
+		StatusCode: constants.STATUS_SUCCESS,
+		StatusMsg:  nil,
+		// get token
+		Token: "1234",
+	}, nil
 }
 
 // UserLogin implements the UserServiceImpl interface.
