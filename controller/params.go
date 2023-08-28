@@ -34,3 +34,9 @@ type UserRegisterParam struct {
 	Username string `json:"username" form:"username"`
 	Password string `json:"password" form:"password"`
 }
+
+// UserLoginParam
+type UserLoginParam struct {
+	Username string `json:"username" form:"username"`
+	Password string `json:"password" form:"password"`
+}

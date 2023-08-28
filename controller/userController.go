@@ -11,12 +11,10 @@
 package controller
 
 import (
-	"Douyin_Demo/common"
 	"Douyin_Demo/config"
 	"Douyin_Demo/constants"
 	"Douyin_Demo/kitex_gen/douyin/user"
 	"Douyin_Demo/kitex_gen/douyin/user/userservice"
-	"Douyin_Demo/model"
 	"github.com/cloudwego/kitex/client"
 	consul "github.com/kitex-contrib/registry-consul"
 	"log"
@@ -24,7 +22,6 @@ import (
 	"regexp"
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 )
 
 var userServiceClient userservice.Client
@@ -55,8 +52,7 @@ func Register(ctx *gin.Context) {
 	}
 	userName := registerParam.Username
 	password := registerParam.Password
-	log.Printf(userName)
-	log.Printf(password)
+
 	//	data check
 	//	null param check
 	if len(userName) == 0 || len(password) == 0 {
@@ -98,66 +94,44 @@ func Register(ctx *gin.Context) {
 
 // Login user login
 func Login(ctx *gin.Context) {
-	db := common.GetDB()
-
-	var requestUser model.User
-	err := ctx.Bind(&requestUser)
+	var loginParam UserLoginParam
+	err := ctx.Bind(&loginParam)
 	if err != nil {
-		panic("Parameter bind failed" + err.Error())
-	}
-	//	get params from web
-	userName := requestUser.Username
-	password := requestUser.Password
-
-	//	data check
-
-	//	username check
-	if len(userName) == 0 {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-			"code":        422,
-			"message":     "用户名不能为空",
-			"description": constants.PARAMS_ERROR,
-		})
-	}
-	//	user in db status
-	var user model.User
-	db.Where("userName = ?", userName).First(&user)
-	if user.ID == 0 {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
-			"code":        422,
-			"message":     "用户不存在",
-			"description": constants.MISMATCH,
+		ctx.JSON(200, gin.H{
+			"status_code": constants.STATUS_FAILED,
+			"status_msg":  err.Error(),
 		})
 		return
 	}
-	//	password check
-	if len(password) < 6 || len(password) > 18 {
-		var rgx = "^[a-zA-Z0-9~!@#\\$%^&*()_+}{\":?><,.';\\]\\[\\\\\\/\\-]{6,18}\\$" // 6 - 18 英语字母数字特殊符号组成
+	userName := loginParam.Username
+	password := loginParam.Password
 
-		matchedRes, _ := regexp.MatchString(rgx, userName)
-
-		if !matchedRes {
-			ctx.JSON(http.StatusUnavailableForLegalReasons, gin.H{
-				"code":        422,
-				"message":     "密码不符合规范,",
-				"description": constants.PARAMS_ERROR,
-			})
-		}
-
-		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-			ctx.JSON(http.StatusExpectationFailed, gin.H{
-				"code":        422,
-				"message":     "密码错误",
-				"description": constants.PARAMS_ERROR,
-			})
-		}
+	//	data check
+	//	null param check
+	if len(userName) == 0 || len(password) == 0 {
+		msg := constants.PARAMS_ERROR
+		ctx.JSON(http.StatusOK, gin.H{
+			"status_code": constants.PARAMS_ERROR_CODE,
+			"status_msg":  &msg,
+		})
+		return
 	}
-	// todo write a token and refresh token
-	ctx.JSON(http.StatusOK, gin.H{
-		"code":        200,
-		"message":     "登陆成功",
-		"description": constants.LOGIN_SUCCESS,
+
+	resp, err := userServiceClient.UserLogin(ctx, &user.UserLoginRequest{
+		Username: userName,
+		Password: password,
 	})
+
+	if err != nil {
+		ctx.JSON(200, gin.H{
+			"status_code": constants.STATUS_FAILED,
+			"status_msg":  err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(200, resp)
+
 }
 
 // GetUserProfileController get user profile

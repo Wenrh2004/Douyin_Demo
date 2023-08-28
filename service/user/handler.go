@@ -159,6 +159,36 @@ func (s *UserServiceImpl) UserRegister(ctx context.Context, req *user.UserRegist
 
 // UserLogin implements the UserServiceImpl interface.
 func (s *UserServiceImpl) UserLogin(ctx context.Context, req *user.UserLoginRequest) (resp *user.UserLoginResponse, err error) {
-	// TODO: Your code here...
-	return
+	// get params
+	loginName := req.Username
+	loginPassword := req.Password
+
+	userQ := repo.Q.User
+	data, err := userQ.WithContext(ctx).Where(userQ.Username.Eq(loginName)).First()
+	if err != nil {
+		msg := constants.INVALID_LOGIN
+		return &user.UserLoginResponse{
+			StatusCode: constants.STATUS_FAILED,
+			StatusMsg:  &msg,
+		}, nil
+	}
+
+	// check password
+	err = bcrypt.CompareHashAndPassword([]byte(data.Password), []byte(loginPassword))
+	if err != nil {
+		msg := constants.INVALID_LOGIN
+		return &user.UserLoginResponse{
+			StatusCode: constants.STATUS_FAILED,
+			StatusMsg:  &msg,
+		}, nil
+	}
+
+	return &user.UserLoginResponse{
+		UserId:     int64(data.ID),
+		StatusCode: constants.STATUS_SUCCESS,
+		StatusMsg:  nil,
+		// TODO get token
+		Token: "12345",
+	}, nil
+
 }
