@@ -12,7 +12,7 @@ func Test() {
 }
 
 func main() {
-	claim := middleware.GenerateJWTClaim(dto.UserRequestDTO{Username: "username1", Password: "password2"})
-	tokenClaim := middleware.ParseTokenClaim(claim)
-	fmt.Println(tokenClaim)
+	//claim := middleware.GenerateJWTClaim(dto.UserRequestDTO{Username: "username1", Password: "password2"})
+	//tokenClaim := middleware.ParseTokenClaim(claim)
+	//fmt.Println(tokenClaim)
 }

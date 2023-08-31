@@ -28,3 +28,15 @@ type UserProfileParam struct {
 	UserId int64  `json:"user_id" form:"user_id"`
 	Token  string `json:"token" form:"token"`
 }
+
+// UserRegisterParam
+type UserRegisterParam struct {
+	Username string `json:"username" form:"username"`
+	Password string `json:"password" form:"password"`
+}
+
+// UserLoginParam
+type UserLoginParam struct {
+	Username string `json:"username" form:"username"`
+	Password string `json:"password" form:"password"`
+}

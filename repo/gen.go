@@ -18,12 +18,14 @@ import (
 var (
 	Q           = new(Query)
 	Publish     *publish
+	User        *user
 	UserProfile *userProfile
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	Publish = &Q.Publish
+	User = &Q.User
 	UserProfile = &Q.UserProfile
 }
 
@@ -31,6 +33,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
 		db:          db,
 		Publish:     newPublish(db, opts...),
+		User:        newUser(db, opts...),
 		UserProfile: newUserProfile(db, opts...),
 	}
 }
@@ -39,6 +42,7 @@ type Query struct {
 	db *gorm.DB
 
 	Publish     publish
+	User        user
 	UserProfile userProfile
 }
 
@@ -48,6 +52,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
 		db:          db,
 		Publish:     q.Publish.clone(db),
+		User:        q.User.clone(db),
 		UserProfile: q.UserProfile.clone(db),
 	}
 }
@@ -64,18 +69,21 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
 		db:          db,
 		Publish:     q.Publish.replaceDB(db),
+		User:        q.User.replaceDB(db),
 		UserProfile: q.UserProfile.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
 	Publish     IPublishDo
+	User        IUserDo
 	UserProfile IUserProfileDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
 		Publish:     q.Publish.WithContext(ctx),
+		User:        q.User.WithContext(ctx),
 		UserProfile: q.UserProfile.WithContext(ctx),
 	}
 }
