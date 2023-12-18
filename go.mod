@@ -17,7 +17,7 @@ require (
 	github.com/kitex-contrib/registry-consul v0.0.0-20230406075225-7d341f036654
 	github.com/spf13/viper v1.16.0
 	go.mongodb.org/mongo-driver v1.12.1
-	golang.org/x/crypto v0.11.0
+	golang.org/x/crypto v0.17.0
 	google.golang.org/protobuf v1.31.0
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/gen v0.3.23
@@ -109,8 +109,8 @@ require (
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.11.0 // indirect
-	golang.org/x/text v0.11.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.11.1 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
